@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="705.0" prefWidth="769.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FrameControllers.MainFrameController">
+   <children>
+      <Group layoutX="29.0" layoutY="70.0">
+            <ListView fx:id="clientsList" layoutY="63.0" prefHeight="505.0" prefWidth="290.0" onMouseClicked="#selectItemOnClientsList"/>
+            <TextField fx:id="clientsPath" layoutY="29.0" prefHeight="25.0" prefWidth="219.0" />
+            <Button fx:id="clientsUp" layoutX="229.0" layoutY="29.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="61.0" text="Up" onAction="#moveUp"/>
+            <Button layoutX="163.0" layoutY="578.0" mnemonicParsing="false" text="Rename" />
+            <Button layoutX="238.0" layoutY="578.0" mnemonicParsing="false" text="Delete" />
+            <Button layoutY="578.0" mnemonicParsing="false" text="New folder" />
+            <Label prefHeight="17.0" prefWidth="290.0" text="Clients drive" />
+      </Group>
+      <Group layoutX="-45.0" layoutY="55.0">
+          <ListView fx:id="serversList" layoutX="494.0" layoutY="78.0" prefHeight="505.0" prefWidth="290.0" />
+          <TextField layoutX="494.0" layoutY="44.0" prefHeight="25.0" prefWidth="219.0" />
+          <Button fx:id="serversUp" layoutX="723.0" layoutY="44.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="61.0" text="Up" onAction="#serverMoveToParent" />
+          <Button layoutX="657.0" layoutY="593.0" mnemonicParsing="false" text="Rename" />
+          <Button layoutX="732.0" layoutY="593.0" mnemonicParsing="false" text="Delete" />
+          <Button layoutX="494.0" layoutY="593.0" mnemonicParsing="false" text="New folder" />
+          <Label layoutX="494.0" layoutY="15.0" prefHeight="17.0" prefWidth="290.0" text="Clients drive" />
+      </Group>
+      <Button layoutX="370.0" layoutY="312.0" mnemonicParsing="false" text="&lt;-" />
+      <Button layoutX="370.0" layoutY="368.0" mnemonicParsing="false" text="-&gt;" />
+      <Button layoutX="29.0" layoutY="14.0" mnemonicParsing="false" text="settings" />
+   </children>
+</AnchorPane>
