@@ -2,9 +2,11 @@ package FrameControllers;
 
 import Handlers.NetworkHandler;
 import MessageTypes.AuthorizationRequest;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -29,15 +31,16 @@ public class Controller implements Initializable {
 
     public void login(ActionEvent actionEvent) {
         AuthorizationRequest request = new AuthorizationRequest(loginField.getText(), passwordField.getText());
-        handler.setMainCallBack(callback);
+
         handler.writeToChannel(request);
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        callback = this::readAuthorizationStatus;
+        callback = o -> Platform.runLater(()->readAuthorizationStatus(o));
         login.setDisable(true);
         handler = NetworkHandler.getInstance();
+        handler.setMainCallBack(callback);
     }
 
     public void updateButton(KeyEvent keyEvent) {
@@ -59,17 +62,19 @@ public class Controller implements Initializable {
     }
 
     private void openMainFrame(){
+        Parent parent;
         try {
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(getClass().getResource("Frames/mainFrame.fxml"));
-        Scene scene = new Scene(fxmlLoader.load());
-        Stage stage = new Stage();
-        stage.setTitle("Share Cloud Storage");
-        stage.setScene(scene);
-        stage.show();
+
+            parent = FXMLLoader.load(getClass().getResource("mainFrame.fxml"));
+            Stage stage = new Stage();
+            stage.setTitle("Share Cloud Storage");
+            stage.setScene(new Scene(parent));
+            stage.show();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
     private void closeThisFrame(){
         Stage stage = (Stage) login.getScene().getWindow();

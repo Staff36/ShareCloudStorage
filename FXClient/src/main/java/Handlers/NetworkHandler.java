@@ -9,11 +9,20 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import lombok.Setter;
-import java.util.function.Consumer;
+import lombok.extern.log4j.Log4j;
 
+import java.util.function.Consumer;
+@Log4j
 public class NetworkHandler {
     private static NetworkHandler instance;
     private static SocketChannel channel;
+    private IncomingMessageHandler incomingMessageHandler = new IncomingMessageHandler();
+
+    public void setMainCallBack(Consumer<Object> mainCallBack) {
+        this.mainCallBack = mainCallBack;
+        incomingMessageHandler.setCallBack(mainCallBack);
+    }
+
     @Setter
     private Consumer<Object> mainCallBack;
     private NetworkHandler(){
@@ -29,7 +38,7 @@ public class NetworkHandler {
                                 channel = socketChannel;
                                 ChannelPipeline pipeline = socketChannel.pipeline();
                                 pipeline.addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-                                        new ObjectEncoder(), new IncomingMessageHandler(mainCallBack));
+                                        new ObjectEncoder(), incomingMessageHandler);
                             }
                         });
                 ChannelFuture f = bootstrap.connect("localhost", 9909).sync();
@@ -45,6 +54,7 @@ public class NetworkHandler {
     }
 
     public void writeToChannel(Object o){
+        log.info("Sending message " + o);
         channel.writeAndFlush(o);
     }
 

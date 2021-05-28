@@ -1,31 +1,40 @@
 package Handlers;
 
 import MessageTypes.AuthorizationAnswer;
+import MessageTypes.FilesList;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.extern.log4j.Log4j;
 
 import java.util.function.Consumer;
-@AllArgsConstructor
+@Log4j
+@Data
 public class IncomingMessageHandler extends ChannelInboundHandlerAdapter{
 
-    Consumer<Object> mainCallBack;
+    private Consumer<Object> callBack;
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-
+    log.info(msg.getClass().getCanonicalName() + "IS INCOMING");
         if (msg == null){
             return;
         }
 
         if(msg instanceof String){
-            System.out.println(msg);
+            log.info(msg);
 
         }
         if (msg instanceof AuthorizationAnswer){
+
             AuthorizationAnswer answer = (AuthorizationAnswer) msg;
-            System.out.println(answer.getStatus());
+            log.info(answer.getStatus());
             AuthorizationHandler.checkAnswer(answer);
-           mainCallBack.accept(answer.getStatus());
+            callBack.accept(answer.getStatus());
+        }
+        if (msg instanceof FilesList){
+            callBack.accept(msg);
         }
     }
 }
