@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="NettyServer" />
         <module name="FXClient" />
+        <module name="Common" />
       </profile>
     </annotationProcessing>
   </component>

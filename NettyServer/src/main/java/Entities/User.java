@@ -11,9 +11,9 @@ public class User {
     private String user;
     private String password;
     private int code;
-    private File rootDir;
+    private String rootDir;
 
-    public User(String user, String password, File file) {
+    public User(String user, String password, String file) {
         this.rootDir = file;
         this.user = user;
         this.password = password;

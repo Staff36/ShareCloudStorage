@@ -3,11 +3,11 @@ package MessageTypes;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.io.File;
 import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
-public class FilesList implements Serializable {
-    File[] files;
+public class AuthorizationAnswer implements Serializable {
+    private String clientsNumber;
+    private String status;
 }

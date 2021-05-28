@@ -3,6 +3,8 @@ package FrameControllers;
 import Handlers.AuthorizationHandler;
 import Handlers.FileHandler;
 import Handlers.NetworkHandler;
+import MessageTypes.FileData;
+import MessageTypes.DownloadingRequest;
 import MessageTypes.FilesList;
 import MessageTypes.ListFilesRequest;
 import javafx.application.Platform;
@@ -28,8 +30,10 @@ public class MainFrameController implements Initializable {
     public TextField clientsPath;
     public Button clientsUp;
     public ListView<String>  serversList;
+    public Button mkServersDirButton;
     private FileHandler fileHandler;
-    private String selectedItem;
+    private String clientsListSelectedItem;
+    private String serversListSelectedItem;
     private Image file = new Image("https://svl.ua/image/cache/download_pdf-32x32.png");
     private Image folder = new Image("https://i0.wp.com/cdna.c3dt.com/icon/328326-com.jrdcom.filemanager.png?w=32");
     private Image disc = new Image("https://findicons.com/files/icons/998/airicons/32/hdd.png");
@@ -44,21 +48,36 @@ public class MainFrameController implements Initializable {
         callBack = o -> Platform.runLater(()->handleIncomingMessage(o));
         networkHandler = NetworkHandler.getInstance();
         networkHandler.setMainCallBack(callBack);
+        networkHandler.writeToChannel(new ListFilesRequest(AuthorizationHandler.getSessionCode(), ""));
         repaintClientsSide(File.listRoots());
-
     }
 
     public void selectItemOnClientsList(MouseEvent mouseEvent) {
         String currentItem = clientsList.getSelectionModel().getSelectedItem();
-        if (selectedItem == null || !selectedItem.equals(currentItem)){
-            selectedItem = currentItem;
+        if (clientsListSelectedItem == null || !clientsListSelectedItem.equals(currentItem)){
+            clientsListSelectedItem = currentItem;
             return;
         } else {
-            fileHandler.moveOrOpenFile(selectedItem);
+            fileHandler.moveOrOpenFile(clientsListSelectedItem);
+            fileHandler.moveOrOpenFile(clientsListSelectedItem);
             repaintClientsSide(fileHandler.getCurrentFiles());
         }
     }
 
+    public void selectItemOnServersList(MouseEvent mouseEvent) {
+        String currentItem = serversList.getSelectionModel().getSelectedItem();
+        if (serversListSelectedItem == null || !serversListSelectedItem.equals(currentItem)){
+            serversListSelectedItem = currentItem;
+            return;
+        } else {
+            File currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getName().equals(currentItem)).findFirst().get();
+            if(currentServersFile.isDirectory()){
+                getRenewServersFilesList(currentItem);
+            } else {
+                networkHandler.writeToChannel(new DownloadingRequest(AuthorizationHandler.getSessionCode(), currentItem));
+            }
+        }
+    }
 
     public void repaintClientsSide(File[] files){
         if (files == null || files.length == 0){
@@ -91,7 +110,8 @@ public class MainFrameController implements Initializable {
             }
         });
     }
-    public void repaintServersList(File[] files){
+
+    public void repaintServersList(){
 
         List<String> fil = Arrays.stream(serversFiles).map(x->x.getName()).collect(Collectors.toList());
         serversList.getItems().clear();
@@ -122,20 +142,74 @@ public class MainFrameController implements Initializable {
     }
 
     public void handleIncomingMessage(Object o){
-        log.info("Updating serversList");
         if (o instanceof FilesList){
+            log.info("Updating serversList");
             FilesList filesList = (FilesList) o;
             serversFiles = filesList.getFiles();
-            repaintServersList(serversFiles);
+            repaintServersList();
+        }
+        if (o instanceof FileData){
+            FileData fileData = (FileData) o;
+            log.info("Downloading file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
+            fileHandler.downloadFile(fileData);
         }
     }
 
-    public void moveUp(ActionEvent actionEvent) {
+    public void clientMoveToParent(ActionEvent actionEvent) {
         fileHandler.moveUp();
         repaintClientsSide(fileHandler.getCurrentFiles());
     }
 
     public void serverMoveToParent(ActionEvent actionEvent) {
-        networkHandler.writeToChannel(new ListFilesRequest(AuthorizationHandler.getSessionCode()));
+        getRenewServersFilesList("/parent");
+    }
+
+
+    public void getRenewServersFilesList(String filename){
+        networkHandler.writeToChannel(new ListFilesRequest(AuthorizationHandler.getSessionCode(),filename));
+    }
+
+
+    public void download(ActionEvent actionEvent) {
+        if (serversList.getSelectionModel().getSelectedItem() == null){
+
+        } else {
+        networkHandler.writeToChannel(new DownloadingRequest(AuthorizationHandler.getSessionCode(), serversList.getSelectionModel().getSelectedItem()));
+        }
+    }
+
+
+
+    public void upload(ActionEvent actionEvent) {
+        if (clientsList.getSelectionModel().getSelectedItem() == null){
+            return;
+        } else {
+            networkHandler.writeToChannel(fileHandler.prepareFileToSending(clientsList.getSelectionModel().getSelectedItem()));
+        }
+    }
+
+    public void deleteClientsFile(ActionEvent actionEvent) {
+        String fileName = clientsList.getSelectionModel().getSelectedItem();
+        File currentFile = fileHandler.getFileByName(fileName);
+        currentFile.delete();
+        fileHandler.updateDirectory();
+        repaintClientsSide(fileHandler.getCurrentFiles());
+    }
+
+    public void createClientsDir(ActionEvent actionEvent) {
+
+    }
+
+    public void renameClientsFile(ActionEvent actionEvent) {
+
+    }
+
+    public void renameServersFile(ActionEvent actionEvent) {
+    }
+
+    public void deleteServersFile(ActionEvent actionEvent) {
+    }
+
+    public void createServersDir(ActionEvent actionEvent) {
     }
 }

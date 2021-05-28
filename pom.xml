@@ -11,6 +11,7 @@
     <modules>
         <module>NettyServer</module>
         <module>FXClient</module>
+        <module>Common</module>
     </modules>
 
     <properties>

@@ -1,12 +1,13 @@
 package Handlers;
 
+import MessageTypes.FileData;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j;
 
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Paths;
 import java.util.Arrays;
 @Log4j
 @Data
@@ -25,7 +26,7 @@ public class FileHandler {
                 currentFiles = selectedFile.listFiles();
             }
         } catch (IOException e) {
-                log.error("Exception of openinig File ", e);
+                log.error("Exception of opening File ", e);
         }
     }
 
@@ -55,9 +56,31 @@ public class FileHandler {
             return Arrays.stream(currentFiles).map(x-> x.getName()).toArray(String[]::new);
         }
     }
+    public void downloadFile(FileData fileData){
+        File file = Paths.get(currentDir.toString(), fileData.getName()).toFile();
+        try (RandomAccessFile fileWriter = new RandomAccessFile(file,"rw")){
+            fileWriter.write(fileData.getData());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public FileData prepareFileToSending(String filename){
+        File file = getFileByName(filename);
+        FileData fileData = null;
+        try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
+        byte[] data = new byte[(int) file.length()];
+        ras.read(data);
+        fileData = new FileData(AuthorizationHandler.getSessionCode(),filename,data,0,0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return fileData;
+
+    }
 
 
-
-
-
+    public void updateDirectory() {
+        currentDir = new File(Paths.get(currentDir.getPath()).toString());
+        currentFiles = currentDir.listFiles();
+    }
 }

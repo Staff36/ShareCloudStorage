@@ -1,10 +1,10 @@
 package Handlers;
 
 import MessageTypes.AuthorizationAnswer;
+import MessageTypes.FileData;
 import MessageTypes.FilesList;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j;
 
@@ -24,7 +24,7 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter{
 
         if(msg instanceof String){
             log.info(msg);
-
+            return;
         }
         if (msg instanceof AuthorizationAnswer){
 
@@ -32,9 +32,11 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter{
             log.info(answer.getStatus());
             AuthorizationHandler.checkAnswer(answer);
             callBack.accept(answer.getStatus());
+            return;
         }
-        if (msg instanceof FilesList){
+
             callBack.accept(msg);
-        }
+
+
     }
 }
