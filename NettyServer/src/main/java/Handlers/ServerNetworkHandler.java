@@ -1,10 +1,5 @@
-import DAO.UserDAO;
-import DAO.UserDAOImplMySQL;
-import Entities.User;
-import MessageTypes.AuthorizationAnswer;
-import MessageTypes.AuthorizationRequest;
-import MessageTypes.FilesList;
-import MessageTypes.ListFilesRequest;
+package Handlers;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -15,10 +10,6 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import lombok.extern.log4j.Log4j;
 
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 @Log4j
 public class ServerNetworkHandler {
 

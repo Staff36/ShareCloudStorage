@@ -178,8 +178,6 @@ public class MainFrameController implements Initializable {
         }
     }
 
-
-
     public void upload(ActionEvent actionEvent) {
         if (clientsList.getSelectionModel().getSelectedItem() == null){
             return;

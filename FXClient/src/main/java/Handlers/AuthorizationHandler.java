@@ -14,7 +14,7 @@ public class AuthorizationHandler {
     }
     public static void checkAnswer(AuthorizationAnswer answer) {
         if (answer.getStatus().equals("Success")){
-            sessionCode = answer.getClientsNumber();
+            sessionCode = answer.getSessionCode();
             log.info("Session number is " + sessionCode);
         }
     }

@@ -8,6 +8,6 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 public class AuthorizationAnswer implements Serializable {
-    private String clientsNumber;
+    private String sessionCode;
     private String status;
 }

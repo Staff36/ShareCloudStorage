@@ -1,3 +1,5 @@
+package Handlers;
+
 import DAO.UserDAO;
 import DAO.UserDAOImplMySQL;
 import Entities.User;
@@ -23,7 +25,10 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
             if (msg instanceof AuthorizationRequest){
                 log.info("Auth trying");
                 AuthorizationRequest request = (AuthorizationRequest) msg;
-                User currentUser = userDAO.getInstanceByName(request.getLogin(), request.getPassword());
+                User requestUser = new User();
+                requestUser.setUser(request.getLogin());
+                requestUser.setPassword(request.getPassword());
+                User currentUser = userDAO.getInstanceByName(requestUser);
                 AuthorizationAnswer answer;
                 if (currentUser.getUser() == null){
                     log.info("Incorrect trying to Authorization, user not found in DB");
