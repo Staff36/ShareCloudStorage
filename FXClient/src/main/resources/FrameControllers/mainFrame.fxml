@@ -2,44 +2,37 @@
 
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
 
-<AnchorPane prefHeight="731.0" prefWidth="769.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FrameControllers.MainFrameController">
+<AnchorPane prefHeight="673.0" prefWidth="769.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FrameControllers.MainFrameController">
 
-      <Group layoutX="21.0" layoutY="69.0">
-            <ListView fx:id="clientsList" layoutY="65.0" onMouseClicked="#selectItemOnClientsList" prefHeight="505.0" prefWidth="332.0" />
-            <TextField fx:id="clientsPath" layoutY="31.0" prefHeight="25.0" prefWidth="263.0" />
-            <Button fx:id="clientsUp" layoutX="271.0" layoutY="31.0" mnemonicParsing="false" onAction="#clientMoveToParent" prefHeight="25.0" prefWidth="61.0" text="Up" />
-            <Button fx:id="clientsRenameButton" layoutX="212.0" layoutY="580.0" mnemonicParsing="false" onAction="#renameClientsFile" text="Rename" />
-            <Button fx:id="clientsDeleteButton" layoutX="276.0" layoutY="580.0" mnemonicParsing="false" onAction="#deleteClientsFile" text="Delete" />
-            <Button fx:id="mkClientsDirButton" layoutX="129.0" layoutY="580.0" mnemonicParsing="false" onAction="#createClientsDir" text="New folder" />
+      <Group layoutX="21.0" layoutY="30.0">
+            <ListView fx:id="clientsList" layoutY="65.0" onMouseClicked="#selectItemOnClientsList" prefHeight="505.0" prefWidth="347.0" />
+            <TextField fx:id="clientsPath" layoutY="31.0" prefHeight="25.0" prefWidth="277.0" />
+            <Button fx:id="clientsUp" layoutX="286.0" layoutY="31.0" mnemonicParsing="false" onAction="#clientMoveToParent" prefHeight="25.0" prefWidth="61.0" text="Up" />
+            <Button fx:id="clientsRenameButton" layoutX="227.0" layoutY="580.0" mnemonicParsing="false" onAction="#renameClientsFile" text="Rename" />
+            <Button fx:id="clientsDeleteButton" layoutX="296.0" layoutY="580.0" mnemonicParsing="false" onAction="#deleteClientsFile" text="Delete" />
+            <Button fx:id="mkClientsDirButton" layoutX="145.0" layoutY="580.0" mnemonicParsing="false" onAction="#createClientsDir" text="New folder" />
             <Label layoutX="128.0" layoutY="8.0" prefHeight="17.0" prefWidth="77.0" text="Clients drive" />
          <Button fx:id="clientsUpdateButton" layoutY="580.0" mnemonicParsing="false" text="Refresh" />
       </Group>
-      <Group layoutX="-45.0" layoutY="55.0">
-          <ListView fx:id="serversList" layoutX="459.0" layoutY="80.0" onMouseClicked="#selectItemOnServersList" prefHeight="505.0" prefWidth="334.0" />
-          <TextField layoutX="459.0" layoutY="47.0" prefHeight="25.0" prefWidth="264.0" />
-          <Button fx:id="serversUp" layoutX="730.0" layoutY="47.0" mnemonicParsing="false" onAction="#serverMoveToParent" prefHeight="25.0" prefWidth="61.0" text="Up" />
-          <Button fx:id="serversRenameButton" layoutX="671.0" layoutY="596.0" mnemonicParsing="false" onAction="#renameServersFile" text="Rename" />
+      <Group layoutX="-45.0" layoutY="14.0">
+          <ListView fx:id="serversList" layoutX="447.0" layoutY="81.0" onMouseClicked="#selectItemOnServersList" prefHeight="505.0" prefWidth="345.0" />
+          <TextField layoutX="447.0" layoutY="47.0" prefHeight="25.0" prefWidth="277.0" />
+          <Button fx:id="serversUp" layoutX="731.0" layoutY="47.0" mnemonicParsing="false" onAction="#serverMoveToParent" prefHeight="25.0" prefWidth="61.0" text="Up" />
+          <Button fx:id="serversRenameButton" layoutX="672.0" layoutY="596.0" mnemonicParsing="false" onAction="#renameServersFile" text="Rename" />
           <Button fx:id="serversDeleteButton" layoutX="742.0" layoutY="596.0" mnemonicParsing="false" onAction="#deleteServersFile" text="Delete" />
           <Button fx:id="mkServersDirButton" layoutX="589.0" layoutY="596.0" mnemonicParsing="false" onAction="#createServersDir" text="New folder" />
           <Label layoutX="586.0" layoutY="24.0" prefHeight="17.0" prefWidth="81.0" text="Servers drive" />
-         <Button fx:id="serversUpdateButton" layoutX="459.0" layoutY="596.0" mnemonicParsing="false" text="Refresh" />
+         <Button fx:id="serversUpdateButton" layoutX="447.0" layoutY="596.0" mnemonicParsing="false" text="Refresh" />
       </Group>
-      <Button layoutX="370.0" layoutY="312.0" mnemonicParsing="false" onAction="#download" text="&lt;-" />
-      <Button layoutX="370.0" layoutY="368.0" mnemonicParsing="false" onAction="#upload" text="-&gt;" />
-      <Button layoutX="689.0" layoutY="27.0" mnemonicParsing="false" text="Settings" />
-   <ImageView fitHeight="55.0" fitWidth="117.0" layoutX="327.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
-      <image>
-         <Image url="@icons/ShareLogo.png" />
-      </image>
-   </ImageView>
-   <Line endX="-15.0" endY="211.0" layoutX="385.0" layoutY="87.0" startX="-15.0" startY="-5.0" stroke="#7c7c7c" strokeWidth="2.0" />
-   <Line endX="40.70709228515625" endY="117.79290771484375" layoutX="330.0" layoutY="564.0" startX="40.0" startY="-155.0" stroke="#7c7c7c" strokeWidth="2.0" />
-    <Line endX="-15.0" endY="211.0" layoutX="415.0" layoutY="87.0" startX="-15.0" startY="-5.0" stroke="#7c7c7c" strokeWidth="2.0" />
-    <Line endX="40.0" endY="118.0" layoutX="360.0" layoutY="564.0" startX="40.0" startY="-155.0" stroke="#7c7c7c" strokeWidth="2.0" />
-   <Line endX="240.0" endY="-0.5" layoutX="130.0" layoutY="683.0" startX="-100.0" stroke="#7c7c7c" strokeWidth="2.0" />
-    <Line endX="250.0" layoutX="501.0" layoutY="683.0" startX="-100.0" stroke="#7c7c7c" strokeWidth="2.0" />
+      <Button layoutX="370.0" layoutY="289.0" mnemonicParsing="false" onAction="#download" prefHeight="25.0" prefWidth="30.0" text="&lt;-" />
+      <Button layoutX="370.0" layoutY="366.0" mnemonicParsing="false" onAction="#upload" text="-&gt;" />
+   <ToolBar nodeOrientation="LEFT_TO_RIGHT" prefHeight="17.0" prefWidth="769.0">
+     <items>
+         <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="65.0" text="File" />
+       <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="65.0" text="Settings" />
+     </items>
+   </ToolBar>
+   <Pane layoutY="652.0" prefHeight="25.0" prefWidth="769.0" style="-fx-background-color: white;" />
 </AnchorPane>
