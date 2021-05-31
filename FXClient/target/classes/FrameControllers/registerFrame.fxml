@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="276.0" prefWidth="583.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FrameControllers.RegisterFrame">
+   <children>
+      <Group layoutX="309.0" layoutY="24.0">
+         <children>
+            <TextField fx:id="login" layoutY="35.0" prefHeight="25.0" prefWidth="221.0" promptText="Login" />
+            <TextField fx:id="eMail" layoutY="77.0" prefHeight="25.0" prefWidth="221.0" promptText="E-mail" />
+            <PasswordField fx:id="password" layoutY="120.0" prefHeight="25.0" prefWidth="221.0" promptText="Password" />
+            <PasswordField fx:id="confirmPassword" layoutY="169.0" prefHeight="25.0" prefWidth="221.0" promptText="Confirm password" />
+         </children>
+      </Group>
+      <ImageView fitHeight="75.0" fitWidth="190.0" layoutX="53.0" layoutY="24.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@icons/ShareLogo.png" />
+         </image>
+      </ImageView>
+      <Group layoutX="53.0" layoutY="120.0">
+         <children>
+            <Label fx:id="confirmText" layoutY="-11.0" prefHeight="51.0" prefWidth="180.0" text="Confirm your e-mail address.      Letter with confirmation code was sent on your e-mail" wrapText="true" />
+            <Label fx:id="repeatEmailText" layoutY="62.0" prefHeight="17.0" prefWidth="106.0" text="Send e-mail again" textFill="#1f00d0" underline="true" visible="false" />
+            <Label fx:id="textForSending" layoutY="62.0" prefHeight="17.0" prefWidth="148.0" text="Sending will available after" />
+            <Label fx:id="timer" layoutX="147.0" layoutY="62.0" prefHeight="17.0" prefWidth="54.0" text="60 sec.">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+         </children>
+      </Group>
+      <Line endX="-100.0" endY="198.0" layoutX="391.0" layoutY="70.0" startX="-100.0" startY="-55.0" stroke="#7c7c7c" />
+      <Button layoutX="420.0" layoutY="239.0" mnemonicParsing="false" onAction="#sendRegisterRequest" prefHeight="25.0" prefWidth="110.0" text="Register" />
+      <Button layoutX="309.0" layoutY="239.0" mnemonicParsing="false" onAction="#closeThis" prefHeight="25.0" prefWidth="63.0" text="Back" />
+      <TextField fx:id="confirmField" layoutX="52.0" layoutY="236.0" onAction="#confirmCode" prefHeight="25.0" prefWidth="130.0" />
+      <Button layoutX="193.0" layoutY="236.0" mnemonicParsing="false" onAction="#checkAuthorizationCode" text="Confirm" fx:id="confirmCodeButton"/>
+      <Label layoutX="309.0" layoutY="24.0" prefHeight="17.0" prefWidth="221.0" text="Set your data">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
