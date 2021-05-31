@@ -18,12 +18,20 @@ public class FileHandler {
 
     public void moveOrOpenFile(String filename){
         File selectedFile = Arrays.stream(currentDir.listFiles()).filter(x -> x.getAbsolutePath().equals(filename) || x.getName().equals(filename)).findFirst().orElse(currentDir);
+        log.info("Selected file is: " + selectedFile.getAbsolutePath());
         try {
             if (selectedFile.isFile()){
-                Desktop.getDesktop().open(currentDir);
+                log.info("Selected file is FILE!");
+                Desktop.getDesktop().open(selectedFile);
             } else {
+                log.info("Selected file is Directory");
                 currentDir = selectedFile;
+                log.info("List of files " + currentDir.list().length);
+                if (currentDir.listFiles().length == 0){
+                    currentFiles = new File[0];
+                } else {
                 currentFiles = selectedFile.listFiles();
+                }
             }
         } catch (IOException e) {
                 log.error("Exception of opening File ", e);
@@ -58,8 +66,9 @@ public class FileHandler {
     }
     public void downloadFile(FileData fileData){
         File file = Paths.get(currentDir.toString(), fileData.getName()).toFile();
-        try (RandomAccessFile fileWriter = new RandomAccessFile(file,"rw")){
-            fileWriter.write(fileData.getData());
+        try (RandomAccessFile ras = new RandomAccessFile(file,"rw")){
+            log.info("Writing file: " + fileData.getName() + " into " + file.getAbsolutePath());
+            ras.write(fileData.getData());
         } catch (IOException e) {
             e.printStackTrace();
         }

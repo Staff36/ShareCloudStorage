@@ -23,11 +23,11 @@ public class UserDAOImplMySQL implements UserDAO<User>{
     }
 
     @Override
-    public User getInstanceByName(String userName, String password){
+    public User getInstanceByName(User user){
         User userFromDB = new User();
         try (PreparedStatement statement = connection.prepareStatement(getUserByLogin)){
-        statement.setString(1, userName);
-        statement.setString(2, password);
+        statement.setString(1, user.getUser());
+        statement.setString(2, user.getPassword());
         ResultSet resultSet = statement.executeQuery();
         if (resultSet.next()){
             userFromDB.setUser(resultSet.getString(2));

@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class Controller implements Initializable {
     public PasswordField passwordField;
     public TextField loginField;
     public Label authLabel;
+    public Label infoLabel;
     private NetworkHandler handler;
     private Consumer<Object> callback;
 
@@ -55,29 +57,22 @@ public class Controller implements Initializable {
         String status = (String) o;
         if (status.equals("Success")){
             closeThisFrame();
-            openMainFrame();
+            FrameSwitcher.openFrame("mainFrame.fxml", "Share Cloud Storage");
         } else {
+            infoLabel.setVisible(false);
             authLabel.setText(status);
         }
     }
 
-    private void openMainFrame(){
-        Parent parent;
-        try {
 
-            parent = FXMLLoader.load(getClass().getResource("mainFrame.fxml"));
-            Stage stage = new Stage();
-            stage.setTitle("Share Cloud Storage");
-            stage.setScene(new Scene(parent));
-            stage.show();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
     private void closeThisFrame(){
         Stage stage = (Stage) login.getScene().getWindow();
         stage.close();
+    }
+
+    public void registerNewUser(ActionEvent actionEvent) {
+        closeThisFrame();
+        FrameSwitcher.openFrame("registerFrame.fxml", "Register new user");
     }
 }

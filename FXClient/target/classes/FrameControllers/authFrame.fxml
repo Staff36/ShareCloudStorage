@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
 
-<AnchorPane prefHeight="224.0" prefWidth="459.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FrameControllers.Controller">
+<AnchorPane prefHeight="237.0" prefWidth="459.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FrameControllers.Controller">
 
-    <TextField fx:id="loginField" layoutX="155.0" layoutY="84.0" onKeyReleased="#updateButton" promptText="Username/e-mail" />
-    <PasswordField fx:id="passwordField" layoutX="156.0" layoutY="127.0" promptText="Password" />
-    <Button fx:id="login" layoutX="205.0" layoutY="173.0" mnemonicParsing="false" onAction="#login" text="Log in" />
+    <TextField fx:id="loginField" layoutX="233.0" layoutY="83.0" onKeyReleased="#updateButton" prefHeight="25.0" prefWidth="195.0" promptText="Username/e-mail" />
+    <PasswordField fx:id="passwordField" layoutX="233.0" layoutY="127.0" prefHeight="25.0" prefWidth="195.0" promptText="Password" />
+    <Button fx:id="login" layoutX="375.0" layoutY="193.0" mnemonicParsing="false" onAction="#login" text="Sign in" />
     <Label fx:id="authLabel" layoutX="216.0" layoutY="38.0" textFill="#bc0000" />
+   <ImageView fitHeight="86.0" fitWidth="157.0" layoutX="25.0" layoutY="84.0" pickOnBounds="true" preserveRatio="true">
+      <image>
+         <Image url="@icons/ShareLogo.png" />
+      </image>
+   </ImageView>
+   <Line endY="187.0" layoutX="203.0" layoutY="37.0" startY="-28.0" stroke="#797979" />
+   <Label layoutX="233.0" layoutY="38.0" prefHeight="17.0" prefWidth="195.0" text="Authorize for using this application" fx:id="infoLabel"/>
+   <Button layoutX="302.0" layoutY="193.0" mnemonicParsing="false" text="Register" onAction="#registerNewUser"/>
+   <Label layoutX="233.0" layoutY="164.0" text="Forgot your password?" textFill="#2200a8" underline="true" />
 
 </AnchorPane>

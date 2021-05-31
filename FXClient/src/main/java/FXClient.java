@@ -13,7 +13,7 @@ public class FXClient extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("FrameControllers/authFrame.fxml"));
         primaryStage.setTitle("Share Cloud Storage: Authorization");
         primaryStage.setScene(new Scene(root));
-        primaryStage.getIcons().add(new Image(MainFrameController.class.getResourceAsStream("icons/AppIcon.png")))
+        primaryStage.getIcons().add(new Image(MainFrameController.class.getResourceAsStream("icons/AppIcon.png")));
         primaryStage.show();
 
     }
