@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.net.URL;
@@ -121,5 +122,9 @@ public class RegisterFrame implements Initializable {
     }
 
     public void confirmCode(ActionEvent actionEvent) {
+    }
+
+    public void sendEmailAgain(MouseEvent mouseEvent) {
+
     }
 }

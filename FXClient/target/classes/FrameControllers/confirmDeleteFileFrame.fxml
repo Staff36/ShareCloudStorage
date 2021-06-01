@@ -3,11 +3,10 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-<AnchorPane prefHeight="127.0" prefWidth="287.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FrameControllers.ConfirmDeleteFileController">
+<AnchorPane prefHeight="127.0" prefWidth="287.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Button layoutX="35.0" layoutY="89.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="78.0" text="Cancel"  onAction="#cancel"/>
-      <Button layoutX="174.0" layoutY="89.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="78.0" fx:id="okButton" onAction="#confirm"/>
-      <Label layoutX="35.0" layoutY="35.0" prefHeight="17.0" prefWidth="214.0" text="Are you sure to delete file?" wrapText="true" fx:id="label"/>
+      <Button layoutX="35.0" layoutY="89.0" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="78.0" text="Cancel" />
+      <Button fx:id="okButton" layoutX="174.0" layoutY="89.0" mnemonicParsing="false" onAction="#confirm" prefHeight="25.0" prefWidth="78.0" text="Ok" />
+      <Label fx:id="label" layoutX="35.0" layoutY="9.0" prefHeight="65.0" prefWidth="220.0" text="Are you sure to delete file?" wrapText="true" />
    </children>
 </AnchorPane>

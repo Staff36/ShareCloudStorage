@@ -4,10 +4,7 @@ import Enums.Sides;
 import Handlers.AuthorizationHandler;
 import Handlers.FileHandler;
 import Handlers.NetworkHandler;
-import MessageTypes.FileData;
-import MessageTypes.DownloadingRequest;
-import MessageTypes.FilesList;
-import MessageTypes.ListFilesRequest;
+import MessageTypes.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
@@ -20,6 +17,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j;
+import sun.misc.Lock;
 
 import java.io.File;
 import java.net.URL;
@@ -148,11 +146,17 @@ public class MainFrameController implements Initializable {
     }
 
     public void upload(ActionEvent actionEvent) {
-        if (clientsList.getSelectionModel().getSelectedItem() == null) {
+        String filename = clientsList.getSelectionModel().getSelectedItem();
+        if (filename == null) {
             return;
         }
-        networkHandler.writeToChannel(fileHandler.prepareFileToSending(clientsList.getSelectionModel().getSelectedItem()));
-
+        File file = fileHandler.getFileByName(filename);
+        if (file.isDirectory()){
+            uploadDirectory(file);
+        } else {
+            networkHandler.writeToChannel(fileHandler.prepareFileToSending(file));
+        }
+        networkHandler.writeToChannel(new ListFilesRequest(AuthorizationHandler.getSessionCode(), ""));
     }
 
     public void deleteClientsFile(ActionEvent actionEvent) {
@@ -160,10 +164,7 @@ public class MainFrameController implements Initializable {
         if (fileName == null) {
             return;
         }
-        File currentFile = fileHandler.getFileByName(fileName);
-        currentFile.delete();
-        fileHandler.updateDirectory();
-        repaintClientsSide(fileHandler.getCurrentFiles());
+        FrameSwitcher.openDeleteConfirmFrame(fileHandler.getFileByName(fileName), Sides.SERVERS_SIDE, this);
     }
 
     public void createClientsDir(ActionEvent actionEvent) {
@@ -179,9 +180,8 @@ public class MainFrameController implements Initializable {
         if (fileName == null) {
             return;
         }
-        FrameSwitcher.openRenameConfirmFrame(fileHandler.getFileByName(fileName), Sides.CLIENTS_SIDE);
-        fileHandler.updateDirectory();
-        repaintClientsSide(fileHandler.getCurrentFiles());
+        FrameSwitcher.openRenameConfirmFrame(fileHandler.getFileByName(fileName), Sides.CLIENTS_SIDE, this);
+
     }
 
     public void renameServersFile(ActionEvent actionEvent) {
@@ -190,16 +190,18 @@ public class MainFrameController implements Initializable {
             return;
         }
         File currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getName().equals(fileName)).findFirst().get();
-        FrameSwitcher.openRenameConfirmFrame(currentServersFile, Sides.SERVERS_SIDE);
-        getRenewServersFilesList("");
+        FrameSwitcher.openRenameConfirmFrame(currentServersFile, Sides.SERVERS_SIDE, this);
+
     }
 
     public void deleteServersFile(ActionEvent actionEvent) {
-        String fileName = clientsList.getSelectionModel().getSelectedItem();
+        String fileName = serversList.getSelectionModel().getSelectedItem();
         if (fileName == null) {
             return;
         }
-        FrameSwitcher.openDeleteConfirmFrame(fileHandler.getFileByName(fileName), Sides.CLIENTS_SIDE);
+        File currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getName().equals(fileName)).findFirst().get();
+        FrameSwitcher.openDeleteConfirmFrame(currentServersFile, Sides.SERVERS_SIDE, this);
+
     }
 
     public void createServersDir(ActionEvent actionEvent) {
@@ -208,7 +210,8 @@ public class MainFrameController implements Initializable {
             return;
         }
         File currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getName().equals(fileName)).findFirst().get();
-        FrameSwitcher.openRenameConfirmFrame(currentServersFile, Sides.SERVERS_SIDE);
+        //todo
+
     }
 
     private ListCell<String> updateServersView(ListView<String> param) {
@@ -270,5 +273,22 @@ public class MainFrameController implements Initializable {
                 }
             }
         };
+    }
+
+    public void uploadDirectory(File file){
+
+            log.info("Sending makeDir, and move There: " + file.getName());
+            networkHandler.writeToChannel(new MakeDirRequest(AuthorizationHandler.getSessionCode(), file.getName()));
+            networkHandler.writeToChannel(new MovingToDirRequest(AuthorizationHandler.getSessionCode(), file.getName()));
+            File[] files = file.listFiles();
+            for (File file1 : files) {
+                if (file1.isDirectory()){
+                        uploadDirectory(file1);
+                } else {
+                    log.info("Uploading file: " + file1.getName());
+                    networkHandler.writeToChannel(fileHandler.prepareFileToSending(file1));
+                }
+            }
+            networkHandler.writeToChannel(new MovingToDirRequest(AuthorizationHandler.getSessionCode(), "/GoToParent"));
     }
 }

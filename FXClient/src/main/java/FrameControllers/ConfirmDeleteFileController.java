@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.net.URL;
@@ -22,10 +23,13 @@ public class ConfirmDeleteFileController implements Initializable {
     private Sides side;
     private String labelText;
     private NetworkHandler networkHandler;
-    public ConfirmDeleteFileController(File file, Sides side) {
+    private MainFrameController mfc;
+
+    public ConfirmDeleteFileController(File file, Sides side, MainFrameController mfc) {
         this.file = file;
         this.side = side;
-        labelText = file.isFile() ? "You really want to delete file " + file.getName() : "You really want to directory" + file.getName();
+        labelText = file.isFile() ? "You really want to delete the file " + file.getName() : "You really want to delete the directory " + file.getName();
+        this.mfc = mfc;
         networkHandler = NetworkHandler.getInstance();
     }
 
@@ -41,8 +45,11 @@ public class ConfirmDeleteFileController implements Initializable {
     public void confirm(ActionEvent actionEvent) {
         if (side.equals(Sides.CLIENTS_SIDE)){
             file.delete();
+            mfc.getFileHandler().updateDirectory();
+            mfc.repaintClientsSide(mfc.getFileHandler().getCurrentFiles());
         } else {
             networkHandler.writeToChannel(new DeleteFileRequest(file, AuthorizationHandler.getSessionCode()));
+            mfc.getRenewServersFilesList("");
         }
         closeThisStage();
     }

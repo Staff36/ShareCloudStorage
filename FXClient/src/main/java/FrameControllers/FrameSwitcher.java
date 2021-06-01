@@ -25,9 +25,9 @@ public class FrameSwitcher {
             log.error("Loading scene throw exception: ", e);
         }
     }
-    public static void openRenameConfirmFrame(File file, Sides side){
+    public static void openRenameConfirmFrame(File file, Sides side, MainFrameController mfc){
         FXMLLoader loader = new FXMLLoader(FrameSwitcher.class.getResource("renameConfirmerFrame.fxml"));
-        RenameConfirmController rcc = new RenameConfirmController(file, side);
+        RenameConfirmController rcc = new RenameConfirmController(file, side, mfc);
         Parent parent;
         String title = file.isFile() ? "Share Cloud Storage: Rename file to ..."
                 : "Share Cloud Storage: Rename directory to ...";
@@ -43,9 +43,9 @@ public class FrameSwitcher {
             log.error("Loading scene throw exception: ", e);
         }
     }
-    public static void openDeleteConfirmFrame(File file, Sides side){
+    public static void openDeleteConfirmFrame(File file, Sides side, MainFrameController mfc){
         FXMLLoader loader = new FXMLLoader(FrameSwitcher.class.getResource("confirmDeleteFileFrame.fxml"));
-        ConfirmDeleteFileController cdfc = new ConfirmDeleteFileController(file, side);
+        ConfirmDeleteFileController cdfc = new ConfirmDeleteFileController(file, side, mfc);
         Parent parent;
         String title = file.isFile() ? "Share Cloud Storage: Confirm delete file"
                 : "Share Cloud Storage: Confirm delete directory";

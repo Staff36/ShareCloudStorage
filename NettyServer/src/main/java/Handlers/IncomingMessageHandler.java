@@ -87,6 +87,26 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 fileHandler.deleteFile(dfr);
             }
 
+            if (msg instanceof MakeDirRequest){
+                MakeDirRequest mdr = (MakeDirRequest) msg;
+                log.info("Making directory " + mdr.getName());
+                fileHandler.makeDir(mdr.getName());
+                return;
+            }
+
+            if (msg instanceof MovingToDirRequest){
+                MovingToDirRequest movingToDirRequest = (MovingToDirRequest) msg;
+                log.info("message folder: " + movingToDirRequest.getDirName());
+                log.info(movingToDirRequest.getDirName().equals("/GoToParent"));
+                if (movingToDirRequest.getDirName().equals("/GoToParent")){
+                    log.info("Moving to parent directory");
+                    fileHandler.moveToParentDirectory();
+                } else {
+                    fileHandler.moveToDirectory(movingToDirRequest.getDirName());
+                }
+                return;
+            }
+
             log.error("Unknown msg type: Class= " + msg.getClass().getCanonicalName() + " !");
         }
 

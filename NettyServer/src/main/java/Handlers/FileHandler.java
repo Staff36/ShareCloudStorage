@@ -32,19 +32,24 @@ public class FileHandler {
     public void moveToDirectory(String name) {
         File currentFile = Arrays.stream(Objects.requireNonNull(currentDir.listFiles())).filter(x -> x.getName().equals(name)).findFirst().get();
         if (currentFile.isDirectory()) {
+            log.info("Moving to: " + currentFile.getAbsolutePath());
             currentDir = currentFile;
         }
     }
 
     public void moveToParentDirectory(){
-
+       log.info("Parent dir is: " + parentDir.getAbsolutePath());
+       log.info(!currentDir.equals(parentDir));
         if (!currentDir.equals(parentDir)){
             currentDir = currentDir.getParentFile();
+            log.info("Moving to Parent: " + currentDir.getAbsolutePath());
+            log.info("Current dir is: " + currentDir.getAbsolutePath());
         }
     }
 
     public void downloadFile(FileData fileData){
         File file = Paths.get(currentDir.toString(), fileData.getName()).toFile();
+        log.info("Downloading file: " +file.getName());
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
          ras.write(fileData.getData());
         } catch (IOException e) {
@@ -59,7 +64,7 @@ public class FileHandler {
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
            byte[] bytes = new byte[(int) file.length()];
             ras.read(bytes);
-            log.info("Sending file");
+            log.info("Sending file: " + file.getName());
             return new FileData(sessionCode,name,bytes, 0,0);
         } catch (IOException e) {
             e.printStackTrace();
@@ -72,24 +77,21 @@ public class FileHandler {
     }
 
     public void makeDir(String name){
-        File file = Paths.get(currentDir.toString(), name).toFile();
+        File file = Paths.get(currentDir.getPath(), name).toFile();
+        log.info("Making dir: " + file.getAbsolutePath());
         file.mkdir();
     }
 
     public void updateListsOfDirectories(){
         currentDir = new File(Paths.get(currentDir.getPath()).toString());
-        parentDir = new File(Paths.get(currentDir.getPath()).toString());
+        parentDir = new File(Paths.get(parentDir.getPath()).toString());
     }
 
     public void renameFile(RenameFileRequest renameFileRequest){
         String name = renameFileRequest.getOldFile().getName();
         File currentFile = Arrays.stream(Objects.requireNonNull(currentDir.listFiles())).filter(x -> x.getName().equals(name)).findFirst().get();
         File newFile;
-        if (currentFile.isFile()){
-        newFile = Paths.get(currentFile.getPath(), renameFileRequest.getNewFile().getName()).toFile();
-        } else {
         newFile = Paths.get(currentFile.getParentFile().getPath(), renameFileRequest.getNewFile().getName()).toFile();
-        }
         currentFile.renameTo(newFile);
     }
 
@@ -100,5 +102,6 @@ public class FileHandler {
         String name = dfr.getFile().getName();
         File currentFile = Arrays.stream(Objects.requireNonNull(currentDir.listFiles())).filter(x -> x.getName().equals(name)).findFirst().get();
         currentFile.delete();
+
     }
 }

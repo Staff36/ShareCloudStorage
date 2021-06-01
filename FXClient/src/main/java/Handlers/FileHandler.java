@@ -84,7 +84,18 @@ public class FileHandler {
             e.printStackTrace();
         }
         return fileData;
+    }
 
+    public FileData prepareFileToSending(File file){
+        FileData fileData = null;
+        try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
+            byte[] data = new byte[(int) file.length()];
+            ras.read(data);
+            fileData = new FileData(AuthorizationHandler.getSessionCode(),file.getName(),data,0,0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return fileData;
     }
 
 
