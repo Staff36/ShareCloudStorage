@@ -1,6 +1,6 @@
 package Handlers;
 
-import DAO.UserDAO;
+import DAO.DAO;
 import DAO.UserDAOImplMySQL;
 import Entities.User;
 import MessageTypes.*;
@@ -11,14 +11,13 @@ import lombok.extern.log4j.Log4j;
 
 @Log4j
 public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
-    private UserDAO<User> userDAO = new UserDAOImplMySQL();
+    private DAO<User> DAO = new UserDAOImplMySQL();
     private FileHandler fileHandler = new FileHandler();
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            log.info("INCOMING MESSAGE!");
             if(msg == null){
-                log.info("NULLABLE");
+                log.info("Nullable message");
                 return;
             }
 
@@ -28,7 +27,7 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 User requestUser = new User();
                 requestUser.setUser(request.getLogin());
                 requestUser.setPassword(request.getPassword());
-                User currentUser = userDAO.getInstanceByName(requestUser);
+                User currentUser = DAO.getInstanceByName(requestUser);
                 AuthorizationAnswer answer;
                 if (currentUser.getUser() == null){
                     log.info("Incorrect trying to Authorization, user not found in DB");
@@ -60,20 +59,34 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
 
             if (msg instanceof FileData){
                 FileData fileData = (FileData) msg;
-                log.info("Incoming a file, name " + fileData.getName() + ", size: " + fileData.getData().length);
+                log.info("Incoming file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
                 fileHandler.downloadFile(fileData);
                 ctx.writeAndFlush(new FilesList(fileHandler.getListFiles()));
                 return;
             }
 
             if (msg instanceof DownloadingRequest){
-                log.info("FILEDOWNLOADREQUEST!");
                 DownloadingRequest fdr = (DownloadingRequest) msg;
                 FileData fileData = fileHandler.prepareFileToUploading(fdr.getFilename());
                 log.info("Sending file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
                 ctx.writeAndFlush(fileData);
                 return;
             }
+
+            if (msg instanceof RenameFileRequest){
+                RenameFileRequest rfr = (RenameFileRequest) msg;
+                if (rfr.getOldFile() == null || rfr.getNewFile() == null){
+                    return;
+                }
+                log.info("Renaming file: " + rfr.getOldFile().getName() + ", to  " + rfr.getNewFile().getName());
+                fileHandler.renameFile(rfr);
+            }
+
+            if (msg instanceof DeleteFileRequest){
+                DeleteFileRequest dfr = (DeleteFileRequest) msg;
+                fileHandler.deleteFile(dfr);
+            }
+
             log.error("Unknown msg type: Class= " + msg.getClass().getCanonicalName() + " !");
         }
 

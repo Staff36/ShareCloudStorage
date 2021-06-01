@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="150.0" prefWidth="388.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FrameControllers.RenameConfirmController">
+   <children>
+      <TextField fx:id="field" layoutX="21.0" layoutY="56.0" prefHeight="25.0" prefWidth="275.0" />
+      <Button fx:id="cancelButton" layoutX="214.0" layoutY="106.0" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="65.0" text="Cancel" />
+      <Button layoutX="301.0" layoutY="106.0" mnemonicParsing="false" onAction="#confirm" prefHeight="25.0" prefWidth="52.0" text="Ok" />
+      <Label fx:id="commandText" layoutX="21.0" layoutY="28.0" prefHeight="17.0" prefWidth="225.0" text="Label" />
+      <Label layoutX="297.0" layoutY="66.0" text="." />
+      <TextField layoutX="301.0" layoutY="56.0" prefHeight="25.0" prefWidth="52.0" fx:id="filesType"/>
+   </children>
+</AnchorPane>

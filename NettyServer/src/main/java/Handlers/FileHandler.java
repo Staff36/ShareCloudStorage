@@ -1,6 +1,8 @@
 package Handlers;
 
+import MessageTypes.DeleteFileRequest;
 import MessageTypes.FileData;
+import MessageTypes.RenameFileRequest;
 import lombok.Data;
 import lombok.extern.log4j.Log4j;
 
@@ -51,6 +53,7 @@ public class FileHandler {
             updateListsOfDirectories();
         }
     }
+
     public FileData prepareFileToUploading(String name){
         File file = Paths.get(currentDir.toString(), name).toFile();
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
@@ -78,4 +81,24 @@ public class FileHandler {
         parentDir = new File(Paths.get(currentDir.getPath()).toString());
     }
 
+    public void renameFile(RenameFileRequest renameFileRequest){
+        String name = renameFileRequest.getOldFile().getName();
+        File currentFile = Arrays.stream(Objects.requireNonNull(currentDir.listFiles())).filter(x -> x.getName().equals(name)).findFirst().get();
+        File newFile;
+        if (currentFile.isFile()){
+        newFile = Paths.get(currentFile.getPath(), renameFileRequest.getNewFile().getName()).toFile();
+        } else {
+        newFile = Paths.get(currentFile.getParentFile().getPath(), renameFileRequest.getNewFile().getName()).toFile();
+        }
+        currentFile.renameTo(newFile);
+    }
+
+    public void deleteFile(DeleteFileRequest dfr) {
+        if (dfr.getFile() == null || dfr.getFile().equals(parentDir)) {
+        return;
+        }
+        String name = dfr.getFile().getName();
+        File currentFile = Arrays.stream(Objects.requireNonNull(currentDir.listFiles())).filter(x -> x.getName().equals(name)).findFirst().get();
+        currentFile.delete();
+    }
 }

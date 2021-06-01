@@ -20,7 +20,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-public class Controller implements Initializable {
+public class AuthenticationFrameController implements Initializable {
 
     public Button login;
     public PasswordField passwordField;

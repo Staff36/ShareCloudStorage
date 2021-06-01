@@ -5,9 +5,9 @@ import Entities.User;
 
 import java.sql.SQLException;
 
-public interface UserDAO<T> {
+public interface DAO<T> {
     T getInstanceByName(T entity);
     void create(T entity);
-    void updateUser(T oldEntity, T newEntity);
-    boolean deleteUser(T entity);
+    int update(T oldEntity, T newEntity);
+    int delete(T entity);
 }

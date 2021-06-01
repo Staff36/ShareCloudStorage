@@ -2,6 +2,7 @@ package FrameControllers;
 
 import Handlers.NetworkHandler;
 import MessageTypes.RegistrationRequest;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -25,11 +26,14 @@ public class RegisterFrame implements Initializable {
     public Label textForSending;
     public TextField confirmField;
     public Button confirmCodeButton;
-    private NetworkHandler networkHandler = NetworkHandler.getInstance();
+    private final NetworkHandler networkHandler = NetworkHandler.getInstance();
     private Consumer<Object> consumer;
+    private Consumer<Integer> timerCallback;
+    private Integer timerValue = 0;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        timerCallback = this::updateTimer;
         consumer = this::handleIncomingMessage;
         networkHandler.setMainCallBack(consumer);
         timer.setVisible(false);
@@ -38,6 +42,21 @@ public class RegisterFrame implements Initializable {
         textForSending.setVisible(false);
         confirmField.setVisible(false);
         confirmCodeButton.setVisible(false);
+    }
+
+    private void updateTimer(Integer value){
+        Platform.runLater(()->{
+            repeatEmailText.setVisible(false);
+            timer.setVisible(true);
+            textForSending.setVisible(true);
+            if (value > 0){
+                timer.setText(value + "sec.");
+            } else {
+                repeatEmailText.setVisible(true);
+                timer.setVisible(false);
+                textForSending.setVisible(false);
+            }
+        });
     }
 
     public void closeThis(ActionEvent actionEvent) {
@@ -52,7 +71,6 @@ public class RegisterFrame implements Initializable {
 
     public void sendRegisterRequest(ActionEvent actionEvent) {
         if (login.getText().isEmpty()){
-
             return;
         }
         if (eMail.getText().isEmpty()){
@@ -64,8 +82,32 @@ public class RegisterFrame implements Initializable {
         if (!confirmPassword.getText().equals(password.getText())){
             return;
         }
+        if (timerValue > 0){
+            return;
+        }
         networkHandler.writeToChannel(new RegistrationRequest(login.getText(), eMail.getText(), password.getText()));
+        timer.setVisible(true);
+        confirmText.setVisible(true);
+        textForSending.setVisible(true);
+        confirmField.setVisible(true);
+        confirmCodeButton.setVisible(true);
+        startEmailConfirmation();
+    }
 
+    private void startEmailConfirmation(){
+        new Thread(()->{
+            int limit = timerValue.equals(0) ? 60 : timerValue;
+            while (limit >= 0){
+                try {
+                    Thread.sleep(1000);
+                    timerCallback.accept(limit);
+                    limit--;
+                    timerValue = limit;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     public void checkAuthorizationCode(ActionEvent actionEvent) {

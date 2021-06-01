@@ -1,5 +1,6 @@
 package FrameControllers;
 
+import Enums.Sides;
 import Handlers.AuthorizationHandler;
 import Handlers.FileHandler;
 import Handlers.NetworkHandler;
@@ -17,14 +18,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -33,26 +31,26 @@ public class MainFrameController implements Initializable {
     public ListView<String> clientsList;
     public TextField clientsPath;
     public Button clientsUp;
-    public ListView<String>  serversList;
+    public ListView<String> serversList;
     public Button mkServersDirButton;
+    @Getter
     private FileHandler fileHandler;
     private String clientsListSelectedItem;
     private String serversListSelectedItem;
-    private final Image file = new Image(getClass().getResourceAsStream("icons/fileIcon.png"));
-    private final Image folder = new Image(getClass().getResourceAsStream("icons/dirIcon.png"));
-    private final Image disc = new Image(getClass().getResourceAsStream("icons/driveIcon.png"));
-    private final Image image = new Image(getClass().getResourceAsStream("icons/imageIcon.png"));
+    private final Image file = new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/fileIcon.png")));
+    private final Image folder = new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/dirIcon.png")));
+    private final Image disc = new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/driveIcon.png")));
+    private final Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/imageIcon.png")));
+    @Getter
     private NetworkHandler networkHandler;
     private Consumer<Object> callBack;
     private File[] serversFiles;
 
 
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
         fileHandler = new FileHandler();
-        callBack = o -> Platform.runLater(()->handleIncomingMessage(o));
+        callBack = o -> Platform.runLater(() -> handleIncomingMessage(o));
         networkHandler = NetworkHandler.getInstance();
         networkHandler.setMainCallBack(callBack);
         networkHandler.writeToChannel(new ListFilesRequest(AuthorizationHandler.getSessionCode(), ""));
@@ -61,11 +59,11 @@ public class MainFrameController implements Initializable {
 
     public void selectItemOnClientsList(MouseEvent mouseEvent) {
         String currentItem = clientsList.getSelectionModel().getSelectedItem();
-        if (currentItem == null){
-           return;
+        if (currentItem == null) {
+            return;
         }
         log.info("Clients Side selected item: " + currentItem);
-        if (clientsListSelectedItem == null || !clientsListSelectedItem.equals(currentItem)){
+        if (clientsListSelectedItem == null || !clientsListSelectedItem.equals(currentItem)) {
             clientsListSelectedItem = currentItem;
             return;
         }
@@ -78,20 +76,20 @@ public class MainFrameController implements Initializable {
     public void selectItemOnServersList(MouseEvent mouseEvent) {
         String currentItem = serversList.getSelectionModel().getSelectedItem();
         log.info("Servers Side selected item: " + currentItem);
-        if (serversListSelectedItem == null || !serversListSelectedItem.equals(currentItem)){
+        if (serversListSelectedItem == null || !serversListSelectedItem.equals(currentItem)) {
             serversListSelectedItem = currentItem;
             return;
         }
 
         File currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getName().equals(currentItem)).findFirst().get();
-        if(currentServersFile.isDirectory()){
+        if (currentServersFile.isDirectory()) {
             getRenewServersFilesList(currentItem);
         }
         serversListSelectedItem = null;
     }
 
-    public void repaintClientsSide(File[] files){
-        if (files == null){
+    public void repaintClientsSide(File[] files) {
+        if (files == null) {
             return;
         }
         fileHandler.setCurrentFiles(files);
@@ -100,8 +98,7 @@ public class MainFrameController implements Initializable {
         clientsList.setCellFactory(this::updateClientsView);
     }
 
-    public void repaintServersList(){
-
+    public void repaintServersList() {
         List<String> fil = Arrays.stream(serversFiles).map(File::getName).collect(Collectors.toList());
         serversList.getItems().clear();
         serversList.getItems().addAll(fil);
@@ -109,14 +106,14 @@ public class MainFrameController implements Initializable {
         serversList.refresh();
     }
 
-    public void handleIncomingMessage(Object o){
-        if (o instanceof FilesList){
+    public void handleIncomingMessage(Object o) {
+        if (o instanceof FilesList) {
             log.info("Updating serversList");
             FilesList filesList = (FilesList) o;
             serversFiles = filesList.getFiles();
             repaintServersList();
         }
-        if (o instanceof FileData){
+        if (o instanceof FileData) {
             FileData fileData = (FileData) o;
             log.info("Downloading file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
             fileHandler.downloadFile(fileData);
@@ -137,29 +134,32 @@ public class MainFrameController implements Initializable {
     }
 
 
-    public void getRenewServersFilesList(String filename){
-        networkHandler.writeToChannel(new ListFilesRequest(AuthorizationHandler.getSessionCode(),filename));
+    public void getRenewServersFilesList(String filename) {
+        networkHandler.writeToChannel(new ListFilesRequest(AuthorizationHandler.getSessionCode(), filename));
     }
 
 
     public void download(ActionEvent actionEvent) {
-        if (serversList.getSelectionModel().getSelectedItem() == null)
+        if (serversList.getSelectionModel().getSelectedItem() == null) {
             return;
-
+        }
         networkHandler.writeToChannel(new DownloadingRequest(AuthorizationHandler.getSessionCode(), serversList.getSelectionModel().getSelectedItem()));
 
     }
 
     public void upload(ActionEvent actionEvent) {
-        if (clientsList.getSelectionModel().getSelectedItem() == null)
+        if (clientsList.getSelectionModel().getSelectedItem() == null) {
             return;
-
+        }
         networkHandler.writeToChannel(fileHandler.prepareFileToSending(clientsList.getSelectionModel().getSelectedItem()));
 
     }
 
     public void deleteClientsFile(ActionEvent actionEvent) {
         String fileName = clientsList.getSelectionModel().getSelectedItem();
+        if (fileName == null) {
+            return;
+        }
         File currentFile = fileHandler.getFileByName(fileName);
         currentFile.delete();
         fileHandler.updateDirectory();
@@ -167,23 +167,48 @@ public class MainFrameController implements Initializable {
     }
 
     public void createClientsDir(ActionEvent actionEvent) {
-
+        String fileName = clientsList.getSelectionModel().getSelectedItem();
+        if (fileName == null) {
+            return;
+        }
+        // TODO: 01.06.2021 (create new frame with name of folder)
     }
 
     public void renameClientsFile(ActionEvent actionEvent) {
-
+        String fileName = clientsList.getSelectionModel().getSelectedItem();
+        if (fileName == null) {
+            return;
+        }
+        FrameSwitcher.openRenameConfirmFrame(fileHandler.getFileByName(fileName), Sides.CLIENTS_SIDE);
+        fileHandler.updateDirectory();
+        repaintClientsSide(fileHandler.getCurrentFiles());
     }
 
     public void renameServersFile(ActionEvent actionEvent) {
-
+        String fileName = serversList.getSelectionModel().getSelectedItem();
+        if (fileName == null) {
+            return;
+        }
+        File currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getName().equals(fileName)).findFirst().get();
+        FrameSwitcher.openRenameConfirmFrame(currentServersFile, Sides.SERVERS_SIDE);
+        getRenewServersFilesList("");
     }
 
     public void deleteServersFile(ActionEvent actionEvent) {
-
+        String fileName = clientsList.getSelectionModel().getSelectedItem();
+        if (fileName == null) {
+            return;
+        }
+        FrameSwitcher.openDeleteConfirmFrame(fileHandler.getFileByName(fileName), Sides.CLIENTS_SIDE);
     }
 
     public void createServersDir(ActionEvent actionEvent) {
-
+        String fileName = serversList.getSelectionModel().getSelectedItem();
+        if (fileName == null) {
+            return;
+        }
+        File currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getName().equals(fileName)).findFirst().get();
+        FrameSwitcher.openRenameConfirmFrame(currentServersFile, Sides.SERVERS_SIDE);
     }
 
     private ListCell<String> updateServersView(ListView<String> param) {
@@ -200,7 +225,7 @@ public class MainFrameController implements Initializable {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    if (item.endsWith(".png") || item.endsWith(".jpeg")) {
+                    if (item.endsWith(".png") || item.endsWith(".jpeg") || item.endsWith(".gif")) {
                         imageView.setImage(image);
                     } else if (itemsFIle != null && itemsFIle.isFile()) {
                         imageView.setImage(file);
@@ -212,6 +237,10 @@ public class MainFrameController implements Initializable {
                 }
             }
         };
+    }
+
+    public void synchronizeCurrentFolder(ActionEvent actionEvent) {
+        // TODO: 01.06.2021 create ChangeListener on File
     }
 
     private ListCell<String> updateClientsView(ListView<String> param) {

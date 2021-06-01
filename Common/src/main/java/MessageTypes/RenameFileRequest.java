@@ -2,12 +2,15 @@ package MessageTypes;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
+import java.io.File;
 import java.io.Serializable;
 
-@AllArgsConstructor
 @Data
-public class MakeDir  implements Serializable {
+@AllArgsConstructor
+public class RenameFileRequest implements Serializable {
+
     String sessionCode;
-    String name;
+    File oldFile;
+    File newFile;
+
 }
