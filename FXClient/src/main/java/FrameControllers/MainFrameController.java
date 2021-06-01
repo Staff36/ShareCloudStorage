@@ -252,7 +252,6 @@ public class MainFrameController implements Initializable {
                 super.updateItem(item, empty);
                 imageView.setPreserveRatio(true);
                 imageView.setFitHeight(20);
-
                 if (empty) {
                     setText(null);
                     setGraphic(null);
