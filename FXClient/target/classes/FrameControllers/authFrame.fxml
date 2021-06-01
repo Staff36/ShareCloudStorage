@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
@@ -19,6 +20,9 @@
    <Line endY="187.0" layoutX="203.0" layoutY="37.0" startY="-28.0" stroke="#797979" />
    <Label fx:id="infoLabel" layoutX="233.0" layoutY="38.0" prefHeight="17.0" prefWidth="195.0" text="Authorize for using this application" />
    <Button layoutX="302.0" layoutY="193.0" mnemonicParsing="false" onAction="#registerNewUser" text="Register" />
-   <Label layoutX="233.0" layoutY="164.0" text="Forgot your password?" textFill="#2200a8" underline="true" />
+   <Label layoutX="233.0" layoutY="164.0" text="Forgot your password?" textFill="#2200a8" underline="true">
+      <cursor>
+         <Cursor fx:constant="HAND" />
+      </cursor></Label>
 
 </AnchorPane>

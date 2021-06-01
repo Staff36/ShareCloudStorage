@@ -15,7 +15,7 @@ public class FrameSwitcher {
     public static void openFrame(String frame, String title){
         Parent parent;
         try {
-            parent = FXMLLoader.load(Objects.requireNonNull(FrameSwitcher.class.getResource(frame)));
+            parent = FXMLLoader.load(FrameSwitcher.class.getResource(frame));
             Stage stage = new Stage();
             stage.setTitle(title);
             stage.getIcons().add(new Image(MainFrameController.class.getResourceAsStream("icons/AppIcon.png")));
@@ -36,7 +36,7 @@ public class FrameSwitcher {
             parent = loader.load();
             Stage stage = new Stage();
             stage.setTitle(title);
-            stage.getIcons().add(new Image(Objects.requireNonNull(MainFrameController.class.getResourceAsStream("icons/AppIcon.png"))));
+            stage.getIcons().add(new Image(MainFrameController.class.getResourceAsStream("icons/AppIcon.png")));
             stage.setScene(new Scene(parent));
             stage.show();
         } catch (IOException e) {

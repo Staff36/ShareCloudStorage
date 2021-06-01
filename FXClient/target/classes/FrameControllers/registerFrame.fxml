@@ -25,7 +25,10 @@
       <Group layoutX="53.0" layoutY="120.0">
          <children>
             <Label fx:id="confirmText" layoutY="-11.0" prefHeight="51.0" prefWidth="180.0" text="Confirm your e-mail address.      Letter with confirmation code was sent on your e-mail" wrapText="true" />
-            <Label fx:id="repeatEmailText" layoutY="62.0" prefHeight="17.0" prefWidth="106.0" text="Send e-mail again" textFill="#1f00d0" underline="true" visible="false" />
+            <Label fx:id="repeatEmailText" layoutY="62.0" onMouseClicked="#sendEmailAgain" prefHeight="17.0" prefWidth="106.0" text="Send e-mail again" textFill="#1f00d0" underline="true" visible="false">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor></Label>
             <Label fx:id="textForSending" layoutY="62.0" prefHeight="17.0" prefWidth="148.0" text="Sending will available after" />
             <Label fx:id="timer" layoutX="147.0" layoutY="62.0" prefHeight="17.0" prefWidth="54.0" text="60 sec.">
                <font>
@@ -38,7 +41,7 @@
       <Button layoutX="420.0" layoutY="239.0" mnemonicParsing="false" onAction="#sendRegisterRequest" prefHeight="25.0" prefWidth="110.0" text="Register" />
       <Button layoutX="309.0" layoutY="239.0" mnemonicParsing="false" onAction="#closeThis" prefHeight="25.0" prefWidth="63.0" text="Back" />
       <TextField fx:id="confirmField" layoutX="52.0" layoutY="236.0" onAction="#confirmCode" prefHeight="25.0" prefWidth="130.0" />
-      <Button layoutX="193.0" layoutY="236.0" mnemonicParsing="false" onAction="#checkAuthorizationCode" text="Confirm" fx:id="confirmCodeButton"/>
+      <Button fx:id="confirmCodeButton" layoutX="193.0" layoutY="236.0" mnemonicParsing="false" onAction="#checkAuthorizationCode" text="Confirm" />
       <Label layoutX="309.0" layoutY="24.0" prefHeight="17.0" prefWidth="221.0" text="Set your data">
          <font>
             <Font name="System Bold" size="12.0" />
