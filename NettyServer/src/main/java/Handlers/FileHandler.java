@@ -2,12 +2,11 @@ package Handlers;
 
 import MessageTypes.DeleteFileRequest;
 import MessageTypes.FileData;
+import MessageTypes.FileImpl;
 import MessageTypes.RenameFileRequest;
 import lombok.Data;
 import lombok.extern.log4j.Log4j;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Paths;
@@ -72,8 +71,9 @@ public class FileHandler {
         return null;
     }
 
-    public File[] getListFiles(){
-        return currentDir.listFiles();
+    public FileImpl[] getListFiles(){
+
+       return Arrays.stream(currentDir.listFiles()).map(x->new FileImpl(x.getName(), x.list(), x.isFile())).toArray(FileImpl[]::new);
     }
 
     public void makeDir(String name){
@@ -88,10 +88,10 @@ public class FileHandler {
     }
 
     public void renameFile(RenameFileRequest renameFileRequest){
-        String name = renameFileRequest.getOldFile().getName();
+        String name = renameFileRequest.getOldFile().getFileName();
         File currentFile = Arrays.stream(Objects.requireNonNull(currentDir.listFiles())).filter(x -> x.getName().equals(name)).findFirst().get();
         File newFile;
-        newFile = Paths.get(currentFile.getParentFile().getPath(), renameFileRequest.getNewFile().getName()).toFile();
+        newFile = Paths.get(currentFile.getParentFile().getPath(), renameFileRequest.getNewFile().getFileName()).toFile();
         currentFile.renameTo(newFile);
     }
 
@@ -99,7 +99,7 @@ public class FileHandler {
         if (dfr.getFile() == null || dfr.getFile().equals(parentDir)) {
         return;
         }
-        String name = dfr.getFile().getName();
+        String name = dfr.getFile().getFileName();
         File currentFile = Arrays.stream(Objects.requireNonNull(currentDir.listFiles())).filter(x -> x.getName().equals(name)).findFirst().get();
         currentFile.delete();
 

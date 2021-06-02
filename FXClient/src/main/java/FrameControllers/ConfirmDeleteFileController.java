@@ -4,6 +4,7 @@ import Enums.Sides;
 import Handlers.AuthorizationHandler;
 import Handlers.NetworkHandler;
 import MessageTypes.DeleteFileRequest;
+import MessageTypes.FileImpl;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -19,16 +20,16 @@ import java.util.ResourceBundle;
 public class ConfirmDeleteFileController implements Initializable {
 
     public Label label;
-    private File file;
+    private FileImpl file;
     private Sides side;
     private String labelText;
     private NetworkHandler networkHandler;
     private MainFrameController mfc;
 
-    public ConfirmDeleteFileController(File file, Sides side, MainFrameController mfc) {
+    public ConfirmDeleteFileController(FileImpl file, Sides side, MainFrameController mfc) {
         this.file = file;
         this.side = side;
-        labelText = file.isFile() ? "You really want to delete the file " + file.getName() : "You really want to delete the directory " + file.getName();
+        labelText = file.isFile() ? "You really want to delete the file " + file.getFileName() : "You really want to delete the directory " + file.getFileName();
         this.mfc = mfc;
         networkHandler = NetworkHandler.getInstance();
     }
@@ -44,7 +45,7 @@ public class ConfirmDeleteFileController implements Initializable {
 
     public void confirm(ActionEvent actionEvent) {
         if (side.equals(Sides.CLIENTS_SIDE)){
-            file.delete();
+            mfc.getFileHandler().getFileByName(file.getFileName()).delete();
             mfc.getFileHandler().updateDirectory();
             mfc.repaintClientsSide(mfc.getFileHandler().getCurrentFiles());
         } else {

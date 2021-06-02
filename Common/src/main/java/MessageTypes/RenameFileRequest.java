@@ -2,7 +2,6 @@ package MessageTypes;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import java.io.File;
 import java.io.Serializable;
 
 @Data
@@ -10,7 +9,7 @@ import java.io.Serializable;
 public class RenameFileRequest implements Serializable {
 
     String sessionCode;
-    File oldFile;
-    File newFile;
+    FileImpl oldFile;
+    FileImpl newFile;
 
 }

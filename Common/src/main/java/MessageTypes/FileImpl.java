@@ -6,7 +6,8 @@ import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
-public class DeleteFileRequest implements Serializable {
-    FileImpl file;
-    String sessionCode;
+public class FileImpl implements Serializable {
+    String fileName;
+    String[] listOfChild;
+    boolean isFile;
 }

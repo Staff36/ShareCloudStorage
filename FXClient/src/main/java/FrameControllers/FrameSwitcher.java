@@ -1,6 +1,7 @@
 package FrameControllers;
 
 import Enums.Sides;
+import MessageTypes.FileImpl;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -25,7 +26,7 @@ public class FrameSwitcher {
             log.error("Loading scene throw exception: ", e);
         }
     }
-    public static void openRenameConfirmFrame(File file, Sides side, MainFrameController mfc){
+    public static void openRenameConfirmFrame(FileImpl file, Sides side, MainFrameController mfc){
         FXMLLoader loader = new FXMLLoader(FrameSwitcher.class.getResource("renameConfirmerFrame.fxml"));
         RenameConfirmController rcc = new RenameConfirmController(file, side, mfc);
         Parent parent;
@@ -43,7 +44,7 @@ public class FrameSwitcher {
             log.error("Loading scene throw exception: ", e);
         }
     }
-    public static void openDeleteConfirmFrame(File file, Sides side, MainFrameController mfc){
+    public static void openDeleteConfirmFrame(FileImpl file, Sides side, MainFrameController mfc){
         FXMLLoader loader = new FXMLLoader(FrameSwitcher.class.getResource("confirmDeleteFileFrame.fxml"));
         ConfirmDeleteFileController cdfc = new ConfirmDeleteFileController(file, side, mfc);
         Parent parent;

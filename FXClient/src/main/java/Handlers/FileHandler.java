@@ -2,7 +2,6 @@ package Handlers;
 
 import MessageTypes.FileData;
 import lombok.Data;
-import lombok.Getter;
 import lombok.extern.log4j.Log4j;
 
 import java.awt.*;

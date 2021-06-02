@@ -17,14 +17,14 @@ public class NetworkHandler {
     private static NetworkHandler instance;
     private static SocketChannel channel;
     private IncomingMessageHandler incomingMessageHandler = new IncomingMessageHandler();
+    @Setter
+    private Consumer<Object> mainCallBack;
 
     public void setMainCallBack(Consumer<Object> mainCallBack) {
         this.mainCallBack = mainCallBack;
         incomingMessageHandler.setCallBack(mainCallBack);
     }
 
-    @Setter
-    private Consumer<Object> mainCallBack;
     private NetworkHandler(){
         Thread thread = new Thread(() -> {
             EventLoopGroup elg = new NioEventLoopGroup();
@@ -64,7 +64,5 @@ public class NetworkHandler {
         }
         return instance;
     }
-
-
 
 }

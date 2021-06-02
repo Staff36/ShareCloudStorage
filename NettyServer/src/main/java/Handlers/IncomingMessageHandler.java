@@ -1,18 +1,24 @@
 package Handlers;
 
 import DAO.DAO;
-import DAO.UserDAOImplMySQL;
+import DAO.UserDAOImplSQLite;
+import DAO.ConfirmEmailSQLite;
+import Entities.Confirmation;
 import Entities.User;
 import MessageTypes.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.log4j.Log4j;
+import java.util.Random;
 
 
 @Log4j
 public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
-    private DAO<User> DAO = new UserDAOImplMySQL();
+    private UserDAOImplSQLite usersDAO = new UserDAOImplSQLite();
+    private ConfirmEmailSQLite confirmationDAO = new ConfirmEmailSQLite();
     private FileHandler fileHandler = new FileHandler();
+    private MailSender mailSender = new MailSender();
+    private final Random random = new Random();
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -27,12 +33,15 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 User requestUser = new User();
                 requestUser.setUser(request.getLogin());
                 requestUser.setPassword(request.getPassword());
-                User currentUser = DAO.getInstanceByName(requestUser);
+                User currentUser = usersDAO.getInstanceByName(requestUser);
                 AuthorizationAnswer answer;
                 if (currentUser.getUser() == null){
                     log.info("Incorrect trying to Authorization, user not found in DB");
                     answer = new AuthorizationAnswer("", "Incorrect login or password");
-                } else {
+                } else if (!currentUser.isEmailIsConfirmed()){
+                    log.info("Email didn't confirmed");
+                    answer = new AuthorizationAnswer("", "Email didn't confirmed");
+                } else{
                     log.info("Successfully authorization. Login: " + currentUser.getUser() + ", Directory: " + currentUser.getRootDir());
                     String code = String.valueOf(currentUser.getCode());
                     fileHandler.initializeUser(currentUser.getRootDir(), code);
@@ -40,6 +49,40 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 }
                 ctx.writeAndFlush(answer);
                 return;
+            }
+
+            if(msg instanceof RegistrationRequest){
+                RegistrationRequest request = (RegistrationRequest) msg;
+                User user = new User();
+                user.setUser(request.getLogin());
+                user.setPassword(request.getPassword());
+                user.setRootDir(request.getLogin());
+                user.setEmail(request.getEMail());
+                usersDAO.create(user);
+                int confirmationCode = random.nextInt(899999) +100000;
+                Confirmation confirmation = new Confirmation();
+                confirmation.setCode(confirmationCode);
+                confirmation.setEmail(user.getEmail());
+                confirmationDAO.create(confirmation);
+                String text = "Confirm your e-mail, your code is: " + confirmationCode;
+                mailSender.send("Share CloudStorage: confirm your e-mail", text, request.getEMail());
+            }
+
+
+            if (msg instanceof ConformationRequest){
+                ConformationRequest conformationRequest = (ConformationRequest) msg;
+                Confirmation confirmation = new Confirmation();
+                confirmation.setEmail(confirmation.getEmail());
+                confirmation.setCode(conformationRequest.getCode());
+                Confirmation returnedConf = confirmationDAO.getInstanceByName(confirmation);
+                if (returnedConf.getEmail() == null){
+                    ctx.writeAndFlush(new ConfirmationAnswer("Error"));
+                    return;
+                }
+                confirmationDAO.confirmEmail(returnedConf);
+                ctx.writeAndFlush(new ConfirmationAnswer("Success"));
+
+
             }
 
             if (msg instanceof ListFilesRequest){
@@ -78,7 +121,7 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 if (rfr.getOldFile() == null || rfr.getNewFile() == null){
                     return;
                 }
-                log.info("Renaming file: " + rfr.getOldFile().getName() + ", to  " + rfr.getNewFile().getName());
+                log.info("Renaming file: " + rfr.getOldFile().getFileName() + ", to  " + rfr.getNewFile().getFileName());
                 fileHandler.renameFile(rfr);
             }
 

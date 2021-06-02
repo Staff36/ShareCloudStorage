@@ -4,6 +4,7 @@ import Enums.Sides;
 import Handlers.AuthorizationHandler;
 import Handlers.FileHandler;
 import Handlers.NetworkHandler;
+import MessageTypes.FileImpl;
 import MessageTypes.RenameFileRequest;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
@@ -24,7 +25,7 @@ import java.util.ResourceBundle;
 @Data
 public class RenameConfirmController implements Initializable {
     public TextField filesType;
-    private File file;
+    private FileImpl file;
     private String labelText;
     private Sides side;
     public Button cancelButton;
@@ -33,7 +34,7 @@ public class RenameConfirmController implements Initializable {
     private NetworkHandler handler;
     private MainFrameController mfc;
 
-    public RenameConfirmController(File file, Sides side, MainFrameController mfc) {
+    public RenameConfirmController(FileImpl file, Sides side, MainFrameController mfc) {
         this.file = file;
         this.side = side;
         this.mfc = mfc;
@@ -44,10 +45,10 @@ public class RenameConfirmController implements Initializable {
         handler = NetworkHandler.getInstance();
         labelText = file.isFile() ? "Rename file to..." : "Rename directory to ...";
         commandText.setText(labelText);
-        if (file.isDirectory()){
+        if (!file.isFile()){
             filesType.setVisible(false);
         }else{
-            String[] typeOfFile = file.getName().split("\\.");
+            String[] typeOfFile = file.getFileName().split("\\.");
             filesType.setText(typeOfFile[typeOfFile.length-1]);
         }
     }
@@ -60,16 +61,16 @@ public class RenameConfirmController implements Initializable {
         if (field.getText().isEmpty()){
             return;
         }
-        log.info("Old File path" + file.getParentFile().getAbsolutePath() + " name " + file.getName());
-        File newFile = filesType.getText().isEmpty() ? Paths.get(file.getParentFile().getPath(), field.getText()).toFile() : Paths.get(file.getParentFile().getPath(),field.getText() + "." + filesType.getText()).toFile();
-        log.info("File new path: " + newFile.getAbsolutePath());
+        File newFile = filesType.getText().isEmpty() ?
+                Paths.get(mfc.getFileHandler().getFileByName(file.getFileName()).getPath(), field.getText()).toFile() :
+                Paths.get(mfc.getFileHandler().getFileByName(file.getFileName()).getPath(),field.getText() + "." + filesType.getText()).toFile();
         if (side.equals(Sides.CLIENTS_SIDE)){
-            file.renameTo(newFile);
+            mfc.getFileHandler().getFileByName(file.getFileName()).renameTo(newFile);
             mfc.getFileHandler().updateDirectory();
             mfc.repaintClientsSide(mfc.getFileHandler().getCurrentFiles());
         }
         if (side.equals(Sides.SERVERS_SIDE)){
-            handler.writeToChannel(new RenameFileRequest(AuthorizationHandler.getSessionCode(), file, newFile));
+            handler.writeToChannel(new RenameFileRequest(AuthorizationHandler.getSessionCode(), file, new FileImpl(newFile.getName(), newFile.list(), newFile.isFile())));
             mfc.getRenewServersFilesList("");
         }
         closeThisStage();

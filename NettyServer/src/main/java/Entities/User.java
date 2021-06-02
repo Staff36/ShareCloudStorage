@@ -12,6 +12,8 @@ public class User {
     private String password;
     private int code;
     private String rootDir;
+    private String email;
+    private boolean emailIsConfirmed = false;
 
     public User(String user, String password, String file) {
         this.rootDir = file;

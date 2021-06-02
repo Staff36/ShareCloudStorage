@@ -42,7 +42,7 @@ public class MainFrameController implements Initializable {
     @Getter
     private NetworkHandler networkHandler;
     private Consumer<Object> callBack;
-    private File[] serversFiles;
+    private FileImpl[] serversFiles;
 
 
     @Override
@@ -79,8 +79,8 @@ public class MainFrameController implements Initializable {
             return;
         }
 
-        File currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getName().equals(currentItem)).findFirst().get();
-        if (currentServersFile.isDirectory()) {
+        FileImpl currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(currentItem)).findFirst().get();
+        if (!currentServersFile.isFile()) {
             getRenewServersFilesList(currentItem);
         }
         serversListSelectedItem = null;
@@ -97,7 +97,7 @@ public class MainFrameController implements Initializable {
     }
 
     public void repaintServersList() {
-        List<String> fil = Arrays.stream(serversFiles).map(File::getName).collect(Collectors.toList());
+        List<String> fil = Arrays.stream(serversFiles).map(FileImpl::getFileName).collect(Collectors.toList());
         serversList.getItems().clear();
         serversList.getItems().addAll(fil);
         serversList.setCellFactory(this::updateServersView);
@@ -164,7 +164,9 @@ public class MainFrameController implements Initializable {
         if (fileName == null) {
             return;
         }
-        FrameSwitcher.openDeleteConfirmFrame(fileHandler.getFileByName(fileName), Sides.SERVERS_SIDE, this);
+        File currentFile = fileHandler.getFileByName(fileName);
+        FileImpl currFile = new FileImpl(fileName, currentFile.list(), currentFile.isFile());
+        FrameSwitcher.openDeleteConfirmFrame(currFile, Sides.SERVERS_SIDE, this);
     }
 
     public void createClientsDir(ActionEvent actionEvent) {
@@ -180,7 +182,9 @@ public class MainFrameController implements Initializable {
         if (fileName == null) {
             return;
         }
-        FrameSwitcher.openRenameConfirmFrame(fileHandler.getFileByName(fileName), Sides.CLIENTS_SIDE, this);
+        File currentFile = fileHandler.getFileByName(fileName);
+        FileImpl fileImpl = new FileImpl(fileName, currentFile.list(), currentFile.isFile());
+        FrameSwitcher.openRenameConfirmFrame(fileImpl, Sides.CLIENTS_SIDE, this);
 
     }
 
@@ -189,7 +193,7 @@ public class MainFrameController implements Initializable {
         if (fileName == null) {
             return;
         }
-        File currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getName().equals(fileName)).findFirst().get();
+        FileImpl currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(fileName)).findFirst().get();
         FrameSwitcher.openRenameConfirmFrame(currentServersFile, Sides.SERVERS_SIDE, this);
 
     }
@@ -199,7 +203,7 @@ public class MainFrameController implements Initializable {
         if (fileName == null) {
             return;
         }
-        File currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getName().equals(fileName)).findFirst().get();
+        FileImpl currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(fileName)).findFirst().get();
         FrameSwitcher.openDeleteConfirmFrame(currentServersFile, Sides.SERVERS_SIDE, this);
 
     }
@@ -209,7 +213,7 @@ public class MainFrameController implements Initializable {
         if (fileName == null) {
             return;
         }
-        File currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getName().equals(fileName)).findFirst().get();
+        FileImpl currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(fileName)).findFirst().get();
         //todo
 
     }
@@ -223,7 +227,7 @@ public class MainFrameController implements Initializable {
                 super.updateItem(item, empty);
                 imageView.setPreserveRatio(true);
                 imageView.setFitHeight(20);
-                File itemsFIle = Arrays.stream(serversFiles).filter(x -> x.getAbsolutePath().equals(item) || x.getName().equals(item)).findFirst().orElse(null);
+                FileImpl itemsFIle = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(item)).findFirst().orElse(null);
                 if (empty) {
                     setText(null);
                     setGraphic(null);

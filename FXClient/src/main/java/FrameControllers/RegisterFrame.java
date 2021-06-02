@@ -1,6 +1,8 @@
 package FrameControllers;
 
 import Handlers.NetworkHandler;
+import MessageTypes.AuthorizationAnswer;
+import MessageTypes.ConformationRequest;
 import MessageTypes.RegistrationRequest;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -112,12 +114,16 @@ public class RegisterFrame implements Initializable {
     }
 
     public void checkAuthorizationCode(ActionEvent actionEvent) {
-
-
+        networkHandler.writeToChannel(new ConformationRequest(Integer.parseInt(confirmField.getText()), eMail.getText()));
     }
 
     private void handleIncomingMessage(Object o){
-
+        if(o instanceof AuthorizationAnswer){
+            AuthorizationAnswer answer = (AuthorizationAnswer) o;
+            if(answer.getStatus().equals("Email didn't confirmed")){
+                networkHandler.writeToChannel(new ConformationRequest(Integer.parseInt(confirmField.getText()), eMail.getText()));
+            } else if(answer.getStatus().equals())
+        }
 
     }
 
