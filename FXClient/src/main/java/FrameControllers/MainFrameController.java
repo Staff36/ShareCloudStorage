@@ -17,7 +17,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j;
-import sun.misc.Lock;
 
 import java.io.File;
 import java.net.URL;
@@ -44,9 +43,9 @@ public class MainFrameController implements Initializable {
     private Consumer<Object> callBack;
     private FileImpl[] serversFiles;
 
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
         fileHandler = new FileHandler();
         callBack = o -> Platform.runLater(() -> handleIncomingMessage(o));
         networkHandler = NetworkHandler.getInstance();
@@ -118,6 +117,7 @@ public class MainFrameController implements Initializable {
             fileHandler.updateDirectory();
             repaintClientsSide(fileHandler.getCurrentFiles());
         }
+
     }
 
     public void clientMoveToParent(ActionEvent actionEvent) {
@@ -135,7 +135,6 @@ public class MainFrameController implements Initializable {
     public void getRenewServersFilesList(String filename) {
         networkHandler.writeToChannel(new ListFilesRequest(AuthorizationHandler.getSessionCode(), filename));
     }
-
 
     public void download(ActionEvent actionEvent) {
         if (serversList.getSelectionModel().getSelectedItem() == null) {
@@ -185,7 +184,6 @@ public class MainFrameController implements Initializable {
         File currentFile = fileHandler.getFileByName(fileName);
         FileImpl fileImpl = new FileImpl(fileName, currentFile.list(), currentFile.isFile());
         FrameSwitcher.openRenameConfirmFrame(fileImpl, Sides.CLIENTS_SIDE, this);
-
     }
 
     public void renameServersFile(ActionEvent actionEvent) {
@@ -195,7 +193,6 @@ public class MainFrameController implements Initializable {
         }
         FileImpl currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(fileName)).findFirst().get();
         FrameSwitcher.openRenameConfirmFrame(currentServersFile, Sides.SERVERS_SIDE, this);
-
     }
 
     public void deleteServersFile(ActionEvent actionEvent) {
@@ -205,7 +202,6 @@ public class MainFrameController implements Initializable {
         }
         FileImpl currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(fileName)).findFirst().get();
         FrameSwitcher.openDeleteConfirmFrame(currentServersFile, Sides.SERVERS_SIDE, this);
-
     }
 
     public void createServersDir(ActionEvent actionEvent) {
@@ -214,7 +210,7 @@ public class MainFrameController implements Initializable {
             return;
         }
         FileImpl currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(fileName)).findFirst().get();
-        //todo
+        //TODO: 01.06.2021 (create new frame with name of folder)
 
     }
 
@@ -247,7 +243,13 @@ public class MainFrameController implements Initializable {
     }
 
     public void synchronizeCurrentFolder(ActionEvent actionEvent) {
-        // TODO: 01.06.2021 create ChangeListener on File
+        if(clientsListSelectedItem == null){
+            return;
+        }
+        File file = fileHandler.getFileByName(clientsListSelectedItem);
+        if(file.isDirectory()) {
+            networkHandler.writeToChannel(new SyncFolderRequest(new FileImpl(file.getName(), file.list(), false)));
+        }
     }
 
     private ListCell<String> updateClientsView(ListView<String> param) {
@@ -280,9 +282,8 @@ public class MainFrameController implements Initializable {
     }
 
     public void uploadDirectory(File file){
-
             log.info("Sending makeDir, and move There: " + file.getName());
-            networkHandler.writeToChannel(new MakeDirRequest(AuthorizationHandler.getSessionCode(), file.getName()));
+            networkHandler.writeToChannel(new MakeDirRequest(AuthorizationHandler.getSessionCode(), file.getName(), file.lastModified()));
             networkHandler.writeToChannel(new MovingToDirRequest(AuthorizationHandler.getSessionCode(), file.getName()));
             File[] files = file.listFiles();
             for (File file1 : files) {
@@ -295,4 +296,9 @@ public class MainFrameController implements Initializable {
             }
             networkHandler.writeToChannel(new MovingToDirRequest(AuthorizationHandler.getSessionCode(), "/GoToParent"));
     }
+
+
+
+
+
 }

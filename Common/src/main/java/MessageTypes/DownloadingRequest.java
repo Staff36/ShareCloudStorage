@@ -8,7 +8,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 public class DownloadingRequest implements Serializable {
-    String codeSession;
-    String filename;
+    private String codeSession;
+    private String filename;
 
 }

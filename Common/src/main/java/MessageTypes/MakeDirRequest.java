@@ -8,6 +8,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Data
 public class MakeDirRequest implements Serializable {
-    String sessionCode;
-    String name;
+    private String sessionCode;
+    private String name;
+    private long lastModified;
+
 }

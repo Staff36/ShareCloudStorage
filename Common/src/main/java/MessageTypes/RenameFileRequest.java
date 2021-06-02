@@ -8,8 +8,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class RenameFileRequest implements Serializable {
 
-    String sessionCode;
-    FileImpl oldFile;
-    FileImpl newFile;
+    private String sessionCode;
+    private FileImpl oldFile;
+    private FileImpl newFile;
 
 }

@@ -1,16 +1,15 @@
 package Handlers;
 
-import MessageTypes.DeleteFileRequest;
-import MessageTypes.FileData;
-import MessageTypes.FileImpl;
-import MessageTypes.RenameFileRequest;
+import MessageTypes.*;
 import lombok.Data;
 import lombok.extern.log4j.Log4j;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 @Data
 @Log4j
@@ -18,6 +17,7 @@ public class FileHandler {
     private File parentDir = Paths.get("ServersStorage", "Unnamed").toFile();
     private File currentDir = parentDir;
     private String sessionCode;
+    private List<File> synchronizedFolders;
 
    public void initializeUser(String rootDir, String sessionCode){
        this.parentDir = Paths.get("ServersStorage", rootDir).toFile();
@@ -26,6 +26,11 @@ public class FileHandler {
        }
        currentDir = parentDir;
        this.sessionCode = sessionCode;
+       synchronizedFolders = new ArrayList<>();
+   }
+
+   public void addNewSynchroniseFolder(FileImpl file){
+
    }
 
     public void moveToDirectory(String name) {
@@ -51,6 +56,7 @@ public class FileHandler {
         log.info("Downloading file: " +file.getName());
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
          ras.write(fileData.getData());
+         file.setLastModified(fileData.getLastModified());
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -64,7 +70,7 @@ public class FileHandler {
            byte[] bytes = new byte[(int) file.length()];
             ras.read(bytes);
             log.info("Sending file: " + file.getName());
-            return new FileData(sessionCode,name,bytes, 0,0);
+            return new FileData(sessionCode,name,bytes, 0,0, file.lastModified());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -76,10 +82,11 @@ public class FileHandler {
        return Arrays.stream(currentDir.listFiles()).map(x->new FileImpl(x.getName(), x.list(), x.isFile())).toArray(FileImpl[]::new);
     }
 
-    public void makeDir(String name){
-        File file = Paths.get(currentDir.getPath(), name).toFile();
+    public void makeDir(MakeDirRequest mdr){
+        File file = Paths.get(currentDir.getPath(), mdr.getName()).toFile();
         log.info("Making dir: " + file.getAbsolutePath());
         file.mkdir();
+        file.setLastModified(mdr.getLastModified());
     }
 
     public void updateListsOfDirectories(){
@@ -102,6 +109,5 @@ public class FileHandler {
         String name = dfr.getFile().getFileName();
         File currentFile = Arrays.stream(Objects.requireNonNull(currentDir.listFiles())).filter(x -> x.getName().equals(name)).findFirst().get();
         currentFile.delete();
-
     }
 }

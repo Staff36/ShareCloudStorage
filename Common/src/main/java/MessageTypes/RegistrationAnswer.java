@@ -7,7 +7,6 @@ import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
-public class MovingToDirRequest implements Serializable {
-    private String sessionCode;
-    private String dirName;
+public class RegistrationAnswer implements Serializable {
+    private String answer;
 }

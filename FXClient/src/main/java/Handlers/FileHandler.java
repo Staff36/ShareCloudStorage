@@ -1,17 +1,20 @@
 package Handlers;
 
 import MessageTypes.FileData;
+import MessageTypes.FileImpl;
 import lombok.Data;
 import lombok.extern.log4j.Log4j;
-
 import java.awt.*;
 import java.io.*;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
 @Log4j
 @Data
 public class FileHandler {
-
+    private List<DirectoryListener> listenedDirectories = new ArrayList<>();
     private File currentDir = File.listRoots()[0];
     private File[] currentFiles;
 
@@ -68,6 +71,7 @@ public class FileHandler {
         try (RandomAccessFile ras = new RandomAccessFile(file,"rw")){
             log.info("Writing file: " + fileData.getName() + " into " + file.getAbsolutePath());
             ras.write(fileData.getData());
+            file.setLastModified(fileData.getLastModified());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,7 +82,7 @@ public class FileHandler {
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
         byte[] data = new byte[(int) file.length()];
         ras.read(data);
-        fileData = new FileData(AuthorizationHandler.getSessionCode(),filename,data,0,0);
+        fileData = new FileData(AuthorizationHandler.getSessionCode(),filename,data,0,0, file.lastModified());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -90,16 +94,27 @@ public class FileHandler {
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
             byte[] data = new byte[(int) file.length()];
             ras.read(data);
-            fileData = new FileData(AuthorizationHandler.getSessionCode(),file.getName(),data,0,0);
+            fileData = new FileData(AuthorizationHandler.getSessionCode(),file.getName(),data,0,0, file.lastModified());
         } catch (IOException e) {
             e.printStackTrace();
         }
         return fileData;
     }
 
-
     public void updateDirectory() {
         currentDir = new File(Paths.get(currentDir.getPath()).toString());
         currentFiles = currentDir.listFiles();
     }
+
+    public boolean isModifiedFile(FileImpl fileIMpl, long lastModified){
+        File file = getFileByName(fileIMpl.getFileName());
+        if (file.lastModified() == lastModified){
+            log.info("FILE WASN't");
+        } else {
+            log.info("FILE WAS MODIFIED");
+        }
+        return file.lastModified() != lastModified;
+    }
+
+
 }

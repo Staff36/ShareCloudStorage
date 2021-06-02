@@ -12,4 +12,5 @@ public class FileData implements Serializable {
     private byte [] data;
     private int part;
     private int totalPartsValue;
+    private long lastModified;
 }

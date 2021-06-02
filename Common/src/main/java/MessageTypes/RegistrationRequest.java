@@ -8,7 +8,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 public class RegistrationRequest implements Serializable {
-    String login;
-    String eMail;
-    String password;
+    private String login;
+    private String eMail;
+    private String password;
 }

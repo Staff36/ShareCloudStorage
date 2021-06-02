@@ -7,7 +7,9 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 public class FileImpl implements Serializable {
-    String fileName;
-    String[] listOfChild;
-    boolean isFile;
+    private String fileName;
+    private String[] listOfChild;
+    private boolean isFile;
+
+
 }

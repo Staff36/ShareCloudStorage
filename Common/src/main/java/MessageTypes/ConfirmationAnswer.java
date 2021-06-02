@@ -7,6 +7,6 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 public class ConfirmationAnswer implements Serializable {
-    private String error;
+    private String answer;
 
 }

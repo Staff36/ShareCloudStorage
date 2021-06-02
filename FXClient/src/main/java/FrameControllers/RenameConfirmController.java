@@ -2,7 +2,6 @@ package FrameControllers;
 
 import Enums.Sides;
 import Handlers.AuthorizationHandler;
-import Handlers.FileHandler;
 import Handlers.NetworkHandler;
 import MessageTypes.FileImpl;
 import MessageTypes.RenameFileRequest;
@@ -14,11 +13,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import lombok.Data;
 import lombok.extern.log4j.Log4j;
-
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.ResourceBundle;
 
 @Log4j

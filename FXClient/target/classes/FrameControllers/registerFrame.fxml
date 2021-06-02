@@ -11,10 +11,10 @@
    <children>
       <Group layoutX="309.0" layoutY="24.0">
          <children>
-            <TextField fx:id="login" layoutY="35.0" prefHeight="25.0" prefWidth="221.0" promptText="Login" />
+            <TextField fx:id="login" layoutY="43.0" prefHeight="25.0" prefWidth="221.0" promptText="Login" />
             <TextField fx:id="eMail" layoutY="77.0" prefHeight="25.0" prefWidth="221.0" promptText="E-mail" />
-            <PasswordField fx:id="password" layoutY="120.0" prefHeight="25.0" prefWidth="221.0" promptText="Password" />
-            <PasswordField fx:id="confirmPassword" layoutY="169.0" prefHeight="25.0" prefWidth="221.0" promptText="Confirm password" />
+            <PasswordField fx:id="password" layoutY="110.0" prefHeight="25.0" prefWidth="221.0" promptText="Password" />
+            <PasswordField fx:id="confirmPassword" layoutY="141.0" prefHeight="25.0" prefWidth="221.0" promptText="Confirm password" />
          </children>
       </Group>
       <ImageView fitHeight="75.0" fitWidth="190.0" layoutX="53.0" layoutY="24.0" pickOnBounds="true" preserveRatio="true">
@@ -47,5 +47,6 @@
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
+      <Label fx:id="errorLabel" layoutX="309.0" layoutY="210.0" prefHeight="17.0" prefWidth="221.0" textFill="#9a0000" />
    </children>
 </AnchorPane>
