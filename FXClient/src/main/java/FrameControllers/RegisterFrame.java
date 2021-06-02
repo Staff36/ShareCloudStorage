@@ -1,9 +1,7 @@
 package FrameControllers;
 
 import Handlers.NetworkHandler;
-import MessageTypes.AuthorizationAnswer;
-import MessageTypes.ConformationRequest;
-import MessageTypes.RegistrationRequest;
+import MessageTypes.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
@@ -13,11 +11,12 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import lombok.extern.log4j.Log4j;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
-
+@Log4j
 public class RegisterFrame implements Initializable {
     public Label timer;
     public Label repeatEmailText;
@@ -30,6 +29,7 @@ public class RegisterFrame implements Initializable {
     public TextField confirmField;
     public Button confirmCodeButton;
     private final NetworkHandler networkHandler = NetworkHandler.getInstance();
+    public Label errorLabel;
     private Consumer<Object> consumer;
     private Consumer<Integer> timerCallback;
     private Integer timerValue = 0;
@@ -89,12 +89,8 @@ public class RegisterFrame implements Initializable {
             return;
         }
         networkHandler.writeToChannel(new RegistrationRequest(login.getText(), eMail.getText(), password.getText()));
-        timer.setVisible(true);
-        confirmText.setVisible(true);
-        textForSending.setVisible(true);
-        confirmField.setVisible(true);
-        confirmCodeButton.setVisible(true);
-        startEmailConfirmation();
+
+
     }
 
     private void startEmailConfirmation(){
@@ -114,16 +110,41 @@ public class RegisterFrame implements Initializable {
     }
 
     public void checkAuthorizationCode(ActionEvent actionEvent) {
-        networkHandler.writeToChannel(new ConformationRequest(Integer.parseInt(confirmField.getText()), eMail.getText()));
+        ConformationRequest conformationRequest = new ConformationRequest(Integer.parseInt(confirmField.getText()), eMail.getText());
+
+        log.info("Email is: " + conformationRequest.getEmail());
+        networkHandler.writeToChannel(conformationRequest);
     }
 
     private void handleIncomingMessage(Object o){
-        if(o instanceof AuthorizationAnswer){
-            AuthorizationAnswer answer = (AuthorizationAnswer) o;
-            if(answer.getStatus().equals("Email didn't confirmed")){
-                networkHandler.writeToChannel(new ConformationRequest(Integer.parseInt(confirmField.getText()), eMail.getText()));
-            } else if(answer.getStatus().equals())
-        }
+        Platform.runLater(()->{
+            if(o instanceof RegistrationAnswer){
+                RegistrationAnswer answer = (RegistrationAnswer) o;
+                if(answer.getAnswer().equals("Success")){
+                    errorLabel.setVisible(false);
+                    timer.setVisible(true);
+                    confirmText.setVisible(true);
+                    textForSending.setVisible(true);
+                    confirmField.setVisible(true);
+                    confirmCodeButton.setVisible(true);
+                    startEmailConfirmation();
+                } else {
+                    errorLabel.setVisible(true);
+                    errorLabel.setText(answer.getAnswer());
+                }
+            }
+
+            if (o instanceof ConfirmationAnswer){
+                ConfirmationAnswer answer = (ConfirmationAnswer) o;
+                if (answer.getAnswer().equals("Success")){
+                    FrameSwitcher.openFrame("authFrame.fxml", "Share Cloud Storage: Authorization");
+                    closeThisFrame();
+                } else {
+                    errorLabel.setVisible(true);
+                    errorLabel.setText(answer.getAnswer());
+                }
+            }
+        });
 
     }
 

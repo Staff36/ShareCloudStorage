@@ -10,7 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 @Data
 @Log4j
@@ -18,6 +20,7 @@ public class FileHandler {
     private File parentDir = Paths.get("ServersStorage", "Unnamed").toFile();
     private File currentDir = parentDir;
     private String sessionCode;
+    private List<File> synchronizedFolders;
 
    public void initializeUser(String rootDir, String sessionCode){
        this.parentDir = Paths.get("ServersStorage", rootDir).toFile();
@@ -26,6 +29,11 @@ public class FileHandler {
        }
        currentDir = parentDir;
        this.sessionCode = sessionCode;
+       synchronizedFolders = new ArrayList<>();
+   }
+
+   public void addNewSynchroniseFolder(FileImpl file){
+
    }
 
     public void moveToDirectory(String name) {

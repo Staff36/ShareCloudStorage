@@ -1,6 +1,5 @@
 package Handlers;
 
-import DAO.DAO;
 import DAO.UserDAOImplSQLite;
 import DAO.ConfirmEmailSQLite;
 import Entities.Confirmation;
@@ -14,14 +13,13 @@ import java.util.Random;
 
 @Log4j
 public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
-    private UserDAOImplSQLite usersDAO = new UserDAOImplSQLite();
-    private ConfirmEmailSQLite confirmationDAO = new ConfirmEmailSQLite();
     private FileHandler fileHandler = new FileHandler();
     private MailSender mailSender = new MailSender();
     private final Random random = new Random();
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
             if(msg == null){
                 log.info("Nullable message");
                 return;
@@ -33,7 +31,7 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 User requestUser = new User();
                 requestUser.setUser(request.getLogin());
                 requestUser.setPassword(request.getPassword());
-                User currentUser = usersDAO.getInstanceByName(requestUser);
+                User currentUser = UserDAOImplSQLite.getInstanceByName(requestUser);
                 AuthorizationAnswer answer;
                 if (currentUser.getUser() == null){
                     log.info("Incorrect trying to Authorization, user not found in DB");
@@ -56,33 +54,44 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 User user = new User();
                 user.setUser(request.getLogin());
                 user.setPassword(request.getPassword());
-                user.setRootDir(request.getLogin());
                 user.setEmail(request.getEMail());
-                usersDAO.create(user);
+                user.setRootDir(request.getLogin());
+                User userFromDB = UserDAOImplSQLite.getInstanceByName(user);
+                if (userFromDB.getUser() != null){
+                    log.info("User already exists");
+                    ctx.writeAndFlush(new RegistrationAnswer("User already exists"));
+                    return;
+                }
+                UserDAOImplSQLite.create(user);
                 int confirmationCode = random.nextInt(899999) +100000;
                 Confirmation confirmation = new Confirmation();
                 confirmation.setCode(confirmationCode);
                 confirmation.setEmail(user.getEmail());
-                confirmationDAO.create(confirmation);
+                ConfirmEmailSQLite.create(confirmation);
                 String text = "Confirm your e-mail, your code is: " + confirmationCode;
+                log.info("Conf code is " + confirmationCode);
                 mailSender.send("Share CloudStorage: confirm your e-mail", text, request.getEMail());
+                ctx.writeAndFlush(new RegistrationAnswer("Success"));
+                return;
             }
-
 
             if (msg instanceof ConformationRequest){
                 ConformationRequest conformationRequest = (ConformationRequest) msg;
                 Confirmation confirmation = new Confirmation();
-                confirmation.setEmail(confirmation.getEmail());
+                confirmation.setEmail(conformationRequest.getEmail());
                 confirmation.setCode(conformationRequest.getCode());
-                Confirmation returnedConf = confirmationDAO.getInstanceByName(confirmation);
+                log.info("Code is: " + confirmation.getCode() + "  Email is: " + confirmation.getEmail());
+                Confirmation returnedConf = ConfirmEmailSQLite.getInstanceByName(confirmation);
+                log.info("Code is: " + returnedConf.getCode() + "  Email is: " + returnedConf.getEmail());
                 if (returnedConf.getEmail() == null){
+                    log.info("Error: wrong code: ");
                     ctx.writeAndFlush(new ConfirmationAnswer("Error"));
                     return;
                 }
-                confirmationDAO.confirmEmail(returnedConf);
+                ConfirmEmailSQLite.confirmEmail(returnedConf);
+                log.info("Success");
                 ctx.writeAndFlush(new ConfirmationAnswer("Success"));
-
-
+                return;
             }
 
             if (msg instanceof ListFilesRequest){
