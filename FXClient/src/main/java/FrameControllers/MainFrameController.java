@@ -298,7 +298,9 @@ public class MainFrameController implements Initializable {
     }
 
 
-
-
-
+    public void shareFile(ActionEvent actionEvent) {
+        FileImpl file = Arrays.stream(serversFiles).filter(x->x.getFileName().equals(serversListSelectedItem)).findFirst().orElse(null);
+        log.info("Sharing file is " + file.getFileName());
+        FrameSwitcher.openShareConfirmFrame(file);
+    }
 }

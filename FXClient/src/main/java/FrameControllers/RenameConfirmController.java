@@ -59,8 +59,8 @@ public class RenameConfirmController implements Initializable {
             return;
         }
         File newFile = filesType.getText().isEmpty() ?
-                Paths.get(mfc.getFileHandler().getFileByName(file.getFileName()).getPath(), field.getText()).toFile() :
-                Paths.get(mfc.getFileHandler().getFileByName(file.getFileName()).getPath(),field.getText() + "." + filesType.getText()).toFile();
+                Paths.get(mfc.getFileHandler().getFileByName(file.getFileName()).getAbsolutePath(), field.getText()).toFile() :
+                Paths.get(mfc.getFileHandler().getFileByName(file.getFileName()).getAbsolutePath(),field.getText() + "." + filesType.getText()).toFile();
         if (side.equals(Sides.CLIENTS_SIDE)){
             mfc.getFileHandler().getFileByName(file.getFileName()).renameTo(newFile);
             mfc.getFileHandler().updateDirectory();

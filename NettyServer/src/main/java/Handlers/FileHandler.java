@@ -35,6 +35,9 @@ public class FileHandler {
        this.sessionCode = sessionCode;
        synchronizedFolders = new ArrayList<>();
    }
+   public File getFileByName(String name){
+       return Arrays.stream(currentDir.listFiles()).filter(x->x.getName().equals(name)).findFirst().orElse(null);
+   }
 
    public void addNewSynchroniseFolder(FileImpl file){
 
@@ -69,6 +72,17 @@ public class FileHandler {
         } finally {
             updateListsOfDirectories();
         }
+    }
+    public FileData prepareFileToUploading(File file){
+        try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
+            byte[] bytes = new byte[(int) file.length()];
+            ras.read(bytes);
+            log.info("Sending file: " + file.getName());
+            return new FileData(sessionCode,file.getName(),bytes, 0,0, file.lastModified());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public FileData prepareFileToUploading(String name){

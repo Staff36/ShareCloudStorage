@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane prefHeight="140.0" prefWidth="370.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <TextField layoutX="28.0" layoutY="58.0" prefHeight="25.0" prefWidth="315.0" fx:id="textField"/>
+      <Button layoutX="89.0" layoutY="101.0" mnemonicParsing="false" text="Cancel" onAction="#cancel"/>
+      <Button layoutX="229.0" layoutY="101.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="52.0" text="Ok" onAction="#confirm" />
+      <Label layoutX="28.0" layoutY="22.0" prefHeight="17.0" prefWidth="264.0" text="Write login of shares destinator" />
+   </children>
+</AnchorPane>

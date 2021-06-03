@@ -63,5 +63,24 @@ public class FrameSwitcher {
         }
     }
 
+    public static void openShareConfirmFrame(FileImpl file){
+        FXMLLoader loader = new FXMLLoader(FrameSwitcher.class.getResource("shareConfirmFrame.fxml"));
+        ShareConfirmController scc = new ShareConfirmController(file);
+        Parent parent;
+        String title = file.isFile() ? "Share Cloud Storage: Confirm share file"
+                : "Share Cloud Storage: Confirm delete directory";
+        loader.setController(scc);
+        try {
+            parent = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle(title);
+            stage.getIcons().add(new Image(MainFrameController.class.getResourceAsStream("icons/AppIcon.png")));
+            stage.setScene(new Scene(parent));
+            stage.show();
+        } catch (IOException e) {
+            log.error("Loading scene throw exception: ", e);
+        }
+    }
+
 
 }

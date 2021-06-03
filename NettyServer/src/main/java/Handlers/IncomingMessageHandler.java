@@ -1,5 +1,6 @@
 package Handlers;
 
+import DAO.SharedFilesImplSQLite;
 import DAO.UserDAOImplSQLite;
 import DAO.ConfirmEmailSQLite;
 import Entities.Confirmation;
@@ -8,6 +9,8 @@ import MessageTypes.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.log4j.Log4j;
+
+import java.io.File;
 import java.util.Random;
 
 
@@ -103,10 +106,10 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
 
                 } else {
                     fileHandler.moveToDirectory(lfr.getFilename());
-                    if (fileHandler.getCurrentDir().equals(fileHandler.getSharedFilesDirectory())){
-//                        ctx.writeAndFlush(new FilesList());
-                        return;
-                    }
+                }
+                if (fileHandler.getCurrentDir().equals(fileHandler.getSharedFilesDirectory())){
+                    ctx.writeAndFlush(new FilesList(SharedFilesImplSQLite.getListOfSharableFiles(fileHandler.getParentDir().getName())));
+                    return;
                 }
                 log.info("Sending list of files from Directory: " + fileHandler.getCurrentDir().getAbsolutePath());
                 ctx.writeAndFlush(new FilesList(fileHandler.getListFiles()));
@@ -115,6 +118,9 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
             }
 
             if (msg instanceof FileData){
+                if (fileHandler.getCurrentDir().equals(fileHandler.getSharedFilesDirectory())){
+                    return;
+                }
                 FileData fileData = (FileData) msg;
                 log.info("Incoming file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
                 fileHandler.downloadFile(fileData);
@@ -124,7 +130,13 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
 
             if (msg instanceof DownloadingRequest){
                 DownloadingRequest fdr = (DownloadingRequest) msg;
-                FileData fileData = fileHandler.prepareFileToUploading(fdr.getFilename());
+                FileData fileData;
+                if (fileHandler.getCurrentDir().equals(fileHandler.getSharedFilesDirectory())){
+                    File file = SharedFilesImplSQLite.getSharableFileByName(fdr.getFilename(), fileHandler.getParentDir());
+                    fileData = fileHandler.prepareFileToUploading(file);
+                } else{
+                    fileData = fileHandler.prepareFileToUploading(fdr.getFilename());
+                }
                 log.info("Sending file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
                 ctx.writeAndFlush(fileData);
                 return;
@@ -164,6 +176,12 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 return;
             }
 
+            if (msg instanceof ShareFileRequest){
+                ShareFileRequest sfr = (ShareFileRequest) msg;
+                log.info(sfr);
+                SharedFilesImplSQLite.shareFile(fileHandler.getFileByName(sfr.getFile().getFileName()),fileHandler.getParentDir(), sfr.getDestinator());
+                return;
+            }
             log.error("Unknown msg type: Class= " + msg.getClass().getCanonicalName() + " !");
         }
 
