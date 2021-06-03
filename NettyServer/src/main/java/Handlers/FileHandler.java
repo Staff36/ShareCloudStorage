@@ -18,12 +18,19 @@ public class FileHandler {
     private File currentDir = parentDir;
     private String sessionCode;
     private List<File> synchronizedFolders;
+    private File sharedFilesDirectory;
 
    public void initializeUser(String rootDir, String sessionCode){
        this.parentDir = Paths.get("ServersStorage", rootDir).toFile();
        if (!parentDir.exists()){
            parentDir.mkdir();
+
        }
+       sharedFilesDirectory = Paths.get("ServersStorage", rootDir, "Shared Files").toFile();
+       if(!sharedFilesDirectory.exists()){
+           sharedFilesDirectory.mkdir();
+       }
+
        currentDir = parentDir;
        this.sessionCode = sessionCode;
        synchronizedFolders = new ArrayList<>();

@@ -103,9 +103,14 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
 
                 } else {
                     fileHandler.moveToDirectory(lfr.getFilename());
+                    if (fileHandler.getCurrentDir().equals(fileHandler.getSharedFilesDirectory())){
+//                        ctx.writeAndFlush(new FilesList());
+                        return;
+                    }
                 }
                 log.info("Sending list of files from Directory: " + fileHandler.getCurrentDir().getAbsolutePath());
                 ctx.writeAndFlush(new FilesList(fileHandler.getListFiles()));
+
                 return;
             }
 
