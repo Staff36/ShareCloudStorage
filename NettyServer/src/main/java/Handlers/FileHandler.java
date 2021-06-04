@@ -1,5 +1,6 @@
 package Handlers;
 
+import DAO.SharedFilesImplSQLite;
 import MessageTypes.*;
 import lombok.Data;
 import lombok.extern.log4j.Log4j;
@@ -98,9 +99,14 @@ public class FileHandler {
         return null;
     }
 
-    public FileImpl[] getListFiles(){
+    public FileImpl[] getListFiles() {
 
-       return Arrays.stream(currentDir.listFiles()).map(x->new FileImpl(x.getName(), x.list(), x.isFile())).toArray(FileImpl[]::new);
+        return Arrays.stream(currentDir.listFiles())
+                .map(x ->{
+                        File file = SharedFilesImplSQLite.getSharableFileByName(x.getName(), parentDir);
+                        return new FileImpl(x.getName(), x.list(), x.isFile(), file != null, currentDir.equals(sharedFilesDirectory));
+                })
+                .toArray(FileImpl[]::new);
     }
 
     public void makeDir(MakeDirRequest mdr){

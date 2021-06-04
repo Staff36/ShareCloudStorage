@@ -60,14 +60,16 @@ public class RenameConfirmController implements Initializable {
         }
         File newFile = filesType.getText().isEmpty() ?
                 Paths.get(mfc.getFileHandler().getFileByName(file.getFileName()).getAbsolutePath(), field.getText()).toFile() :
-                Paths.get(mfc.getFileHandler().getFileByName(file.getFileName()).getAbsolutePath(),field.getText() + "." + filesType.getText()).toFile();
+                Paths.get(mfc.getFileHandler().getFileByName(file.getFileName()).getParentFile().getAbsolutePath(),field.getText() + "." + filesType.getText()).toFile();
+        log.debug(newFile.getAbsolutePath());
         if (side.equals(Sides.CLIENTS_SIDE)){
             mfc.getFileHandler().getFileByName(file.getFileName()).renameTo(newFile);
             mfc.getFileHandler().updateDirectory();
             mfc.repaintClientsSide(mfc.getFileHandler().getCurrentFiles());
         }
         if (side.equals(Sides.SERVERS_SIDE)){
-            handler.writeToChannel(new RenameFileRequest(AuthorizationHandler.getSessionCode(), file, new FileImpl(newFile.getName(), newFile.list(), newFile.isFile())));
+            handler.writeToChannel(new RenameFileRequest(AuthorizationHandler.getSessionCode(), file,
+                    new FileImpl(newFile.getName(), newFile.list(), newFile.isFile(),file.isShared(), file.isVirtualFile())));
             mfc.getRenewServersFilesList("");
         }
         closeThisStage();

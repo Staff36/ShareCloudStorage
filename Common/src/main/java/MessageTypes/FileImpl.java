@@ -10,6 +10,8 @@ public class FileImpl implements Serializable {
     private String fileName;
     private String[] listOfChild;
     private boolean isFile;
+    private boolean isShared;
+    private boolean isVirtualFile;
 
 
 }

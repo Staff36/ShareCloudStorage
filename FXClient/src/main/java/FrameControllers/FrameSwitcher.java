@@ -82,5 +82,23 @@ public class FrameSwitcher {
         }
     }
 
+    public static void openMakeDirFrame(Sides side, MainFrameController mfc){
+        FXMLLoader loader = new FXMLLoader(FrameSwitcher.class.getResource("mkDirConfirmFrame.fxml"));
+        MkDirConfirmController mkdirController = new MkDirConfirmController(side,mfc);
+        Parent parent;
+        String title = "Creating directory";
+        loader.setController(mkdirController);
+        try {
+            parent = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle(title);
+            stage.getIcons().add(new Image(MainFrameController.class.getResourceAsStream("icons/AppIcon.png")));
+            stage.setScene(new Scene(parent));
+            stage.show();
+        } catch (IOException e) {
+            log.error("Loading scene throw exception: ", e);
+        }
+    }
+
 
 }

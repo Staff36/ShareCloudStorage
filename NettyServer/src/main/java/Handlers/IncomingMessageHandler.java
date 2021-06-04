@@ -153,7 +153,11 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
 
             if (msg instanceof DeleteFileRequest){
                 DeleteFileRequest dfr = (DeleteFileRequest) msg;
+                if (fileHandler.getCurrentDir().equals(fileHandler.getSharedFilesDirectory())){
+                    SharedFilesImplSQLite.unshareFileByName(dfr.getFile(), fileHandler.getParentDir());
+                }
                 fileHandler.deleteFile(dfr);
+                return;
             }
 
             if (msg instanceof MakeDirRequest){
@@ -180,6 +184,7 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 ShareFileRequest sfr = (ShareFileRequest) msg;
                 log.info(sfr);
                 SharedFilesImplSQLite.shareFile(fileHandler.getFileByName(sfr.getFile().getFileName()),fileHandler.getParentDir(), sfr.getDestinator());
+
                 return;
             }
             log.error("Unknown msg type: Class= " + msg.getClass().getCanonicalName() + " !");

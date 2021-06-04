@@ -12,11 +12,12 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
-
+@Log4j
 public class ConfirmDeleteFileController implements Initializable {
 
     public Label label;
@@ -45,7 +46,10 @@ public class ConfirmDeleteFileController implements Initializable {
 
     public void confirm(ActionEvent actionEvent) {
         if (side.equals(Sides.CLIENTS_SIDE)){
-            mfc.getFileHandler().getFileByName(file.getFileName()).delete();
+            File file1 = mfc.getFileHandler().getFileByName(file.getFileName());
+            log.debug("Deliting file: " + file1.getAbsolutePath() + file1.getName());
+            file1.delete();
+            
             mfc.getFileHandler().updateDirectory();
             mfc.repaintClientsSide(mfc.getFileHandler().getCurrentFiles());
         } else {

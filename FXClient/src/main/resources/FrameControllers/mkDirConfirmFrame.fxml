@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="167.0" prefWidth="396.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" >
+   <children>
+      <Button layoutX="214.0" layoutY="128.0" mnemonicParsing="false" text="Cancel" onAction="#cancel"/>
+      <Button layoutX="301.0" layoutY="128.0" mnemonicParsing="false" text="Create" onAction="#confirm"/>
+      <TextField layoutX="45.0" layoutY="59.0" prefHeight="25.0" prefWidth="307.0" fx:id="field"/>
+      <Label layoutX="45.0" layoutY="33.0" prefHeight="17.0" prefWidth="307.0" text="Set directory's name" fx:id="label"/>
+   </children>
+</AnchorPane>

@@ -37,7 +37,7 @@ public class SharedFilesImplSQLite {
             while (resultSet.next()){
                 log.info(resultSet.getString(1));
                 File file = Paths.get(resultSet.getString(1)).toFile();
-                list.add(new FileImpl(file.getName(), file.list(),true));
+                list.add(new FileImpl(file.getName(), file.list(),true, true, true));
             }
             resultSet.close();
         } catch (SQLException throwables) {
@@ -88,5 +88,20 @@ public class SharedFilesImplSQLite {
             disconnect();
         }
 
+    }
+
+    public static void unshareFileByName(FileImpl file, File rootDir) {
+        connect();
+
+        try (PreparedStatement statement = connection.prepareStatement("delete from share_files where real_path like ? and shares_destinator = (select id from users where rootDir = ?)")){
+            statement.setString(1, "%" + file.getFileName());
+            statement.setString(2, rootDir.getAbsolutePath());
+            statement.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }finally {
+            disconnect();
+
+        }
     }
 }

@@ -30,6 +30,7 @@ public class MainFrameController implements Initializable {
     public Button clientsUp;
     public ListView<String> serversList;
     public Button mkServersDirButton;
+    public Button sharButton;
     @Getter
     private FileHandler fileHandler;
     private String clientsListSelectedItem;
@@ -41,6 +42,7 @@ public class MainFrameController implements Initializable {
     @Getter
     private NetworkHandler networkHandler;
     private Consumer<Object> callBack;
+    @Getter
     private FileImpl[] serversFiles;
 
     @Override
@@ -75,12 +77,13 @@ public class MainFrameController implements Initializable {
         log.info("Servers Side selected item: " + currentItem);
         if (serversListSelectedItem == null || !serversListSelectedItem.equals(currentItem)) {
             serversListSelectedItem = currentItem;
+            updateShareButton();
             return;
         }
-
         FileImpl currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(currentItem)).findFirst().get();
         if (!currentServersFile.isFile()) {
             getRenewServersFilesList(currentItem);
+            updateShareButton();
         }
         serversListSelectedItem = null;
     }
@@ -96,10 +99,12 @@ public class MainFrameController implements Initializable {
     }
 
     public void repaintServersList() {
+
         List<String> fil = Arrays.stream(serversFiles).map(FileImpl::getFileName).collect(Collectors.toList());
         serversList.getItems().clear();
         serversList.getItems().addAll(fil);
         serversList.setCellFactory(this::updateServersView);
+
         serversList.refresh();
     }
 
@@ -109,6 +114,7 @@ public class MainFrameController implements Initializable {
             FilesList filesList = (FilesList) o;
             serversFiles = filesList.getFiles();
             repaintServersList();
+
         }
         if (o instanceof FileData) {
             FileData fileData = (FileData) o;
@@ -164,16 +170,15 @@ public class MainFrameController implements Initializable {
             return;
         }
         File currentFile = fileHandler.getFileByName(fileName);
-        FileImpl currFile = new FileImpl(fileName, currentFile.list(), currentFile.isFile());
-        FrameSwitcher.openDeleteConfirmFrame(currFile, Sides.SERVERS_SIDE, this);
+        FileImpl currFile = new FileImpl(fileName, currentFile.list(), currentFile.isFile(), false, false);
+        FrameSwitcher.openDeleteConfirmFrame(currFile, Sides.CLIENTS_SIDE, this);
     }
 
     public void createClientsDir(ActionEvent actionEvent) {
-        String fileName = clientsList.getSelectionModel().getSelectedItem();
-        if (fileName == null) {
-            return;
-        }
-        // TODO: 01.06.2021 (create new frame with name of folder)
+
+        FrameSwitcher.openMakeDirFrame(Sides.CLIENTS_SIDE, this);
+        fileHandler.updateDirectory();
+        repaintClientsSide(fileHandler.getCurrentFiles());
     }
 
     public void renameClientsFile(ActionEvent actionEvent) {
@@ -182,7 +187,8 @@ public class MainFrameController implements Initializable {
             return;
         }
         File currentFile = fileHandler.getFileByName(fileName);
-        FileImpl fileImpl = new FileImpl(fileName, currentFile.list(), currentFile.isFile());
+        FileImpl fileImpl = new FileImpl(fileName, currentFile.list(), currentFile.isFile(), false, false);
+        log.debug(fileImpl + "WILL BE RENAMED");
         FrameSwitcher.openRenameConfirmFrame(fileImpl, Sides.CLIENTS_SIDE, this);
     }
 
@@ -205,13 +211,7 @@ public class MainFrameController implements Initializable {
     }
 
     public void createServersDir(ActionEvent actionEvent) {
-        String fileName = serversList.getSelectionModel().getSelectedItem();
-        if (fileName == null) {
-            return;
-        }
-        FileImpl currentServersFile = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(fileName)).findFirst().get();
-        //TODO: 01.06.2021 (create new frame with name of folder)
-
+        FrameSwitcher.openMakeDirFrame(Sides.SERVERS_SIDE, this);
     }
 
     private ListCell<String> updateServersView(ListView<String> param) {
@@ -248,7 +248,7 @@ public class MainFrameController implements Initializable {
         }
         File file = fileHandler.getFileByName(clientsListSelectedItem);
         if(file.isDirectory()) {
-            networkHandler.writeToChannel(new SyncFolderRequest(new FileImpl(file.getName(), file.list(), false)));
+            networkHandler.writeToChannel(new SyncFolderRequest(new FileImpl(file.getName(), file.list(), false, false, false)));
         }
     }
 
@@ -297,10 +297,41 @@ public class MainFrameController implements Initializable {
             networkHandler.writeToChannel(new MovingToDirRequest(AuthorizationHandler.getSessionCode(), "/GoToParent"));
     }
 
+    private void updateShareButton(){
+        FileImpl file = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(serversListSelectedItem)).findFirst().orElse(null);
+        if (file == null || !file.isFile() || file.isVirtualFile()){
+            sharButton.setDisable(true);
+            return;
+        }
+        if (file.isShared()){
+            sharButton.setDisable(false);
+            sharButton.setText("Unshare");
+        } else {
+            sharButton.setDisable(false);
+            sharButton.setText("Share");
+        }
+    }
+
 
     public void shareFile(ActionEvent actionEvent) {
+        if (serversListSelectedItem == null){
+            return;
+        }
         FileImpl file = Arrays.stream(serversFiles).filter(x->x.getFileName().equals(serversListSelectedItem)).findFirst().orElse(null);
+        if (file.isShared()){
+
+        }
         log.info("Sharing file is " + file.getFileName());
         FrameSwitcher.openShareConfirmFrame(file);
+       networkHandler.writeToChannel(new ListFilesRequest(AuthorizationHandler.getSessionCode(), ""));
+    }
+
+    public void updateServersList(ActionEvent actionEvent) {
+        networkHandler.writeToChannel(new ListFilesRequest(AuthorizationHandler.getSessionCode(), ""));
+    }
+
+    public void updateClientsList(ActionEvent actionEvent) {
+        fileHandler.updateDirectory();
+        repaintClientsSide(fileHandler.getCurrentFiles());
     }
 }
