@@ -10,5 +10,6 @@ import java.io.Serializable;
 public class DownloadingRequest implements Serializable {
     private String codeSession;
     private String filename;
+    private boolean isFile;
 
 }

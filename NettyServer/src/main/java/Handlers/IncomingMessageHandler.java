@@ -12,6 +12,7 @@ import lombok.extern.log4j.Log4j;
 
 import java.io.File;
 import java.util.Random;
+import java.util.function.Consumer;
 
 
 @Log4j
@@ -135,10 +136,14 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                     File file = SharedFilesImplSQLite.getSharableFileByName(fdr.getFilename(), fileHandler.getParentDir());
                     fileData = fileHandler.prepareFileToUploading(file);
                 } else{
-                    fileData = fileHandler.prepareFileToUploading(fdr.getFilename());
+                    if(fdr.isFile()){
+                        fileData = fileHandler.prepareFileToUploading(fdr.getFilename());
+                        log.info("Sending file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
+                        ctx.writeAndFlush(fileData);
+                    } else {
+                        uploadDirectory(fileHandler.getFileByName(fdr.getFilename()), ctx);
+                    }
                 }
-                log.info("Sending file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
-                ctx.writeAndFlush(fileData);
                 return;
             }
 
@@ -190,4 +195,19 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
             log.error("Unknown msg type: Class= " + msg.getClass().getCanonicalName() + " !");
         }
 
+    public void uploadDirectory(File file, ChannelHandlerContext ctx){
+        log.info("Sending makeDir, and move There: " + file.getName());
+        ctx.writeAndFlush(new MakeDirRequest("", file.getName(), file.lastModified()));
+        ctx.writeAndFlush(new MovingToDirRequest("", file.getName()));
+        File[] files = file.listFiles();
+        for (File file1 : files) {
+            if (file1.isDirectory()){
+                uploadDirectory(file1, ctx);
+            } else {
+                log.info("Uploading file: " + file1.getName());
+                ctx.writeAndFlush(fileHandler.prepareFileToUploading(file1));
+            }
+        }
+        ctx.writeAndFlush(new MovingToDirRequest("AuthorizationHandler.getSessionCode()", "/GoToParent"));
+    }
 }

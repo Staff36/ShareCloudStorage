@@ -114,8 +114,8 @@ public class MainFrameController implements Initializable {
             FilesList filesList = (FilesList) o;
             serversFiles = filesList.getFiles();
             repaintServersList();
-
         }
+
         if (o instanceof FileData) {
             FileData fileData = (FileData) o;
             log.info("Downloading file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
@@ -124,6 +124,19 @@ public class MainFrameController implements Initializable {
             repaintClientsSide(fileHandler.getCurrentFiles());
         }
 
+        if (o instanceof MakeDirRequest){
+            MakeDirRequest mkdir = (MakeDirRequest) o;
+            fileHandler.makeDir(mkdir.getName());
+        }
+
+        if (o instanceof MovingToDirRequest){
+            MovingToDirRequest movingToDir = (MovingToDirRequest) o;
+            if (movingToDir.getDirName().equals("/GoToParent")){
+                fileHandler.moveUp();
+            } else {
+            fileHandler.moveOrOpenFile(movingToDir.getDirName());
+            }
+        }
     }
 
     public void clientMoveToParent(ActionEvent actionEvent) {
@@ -146,7 +159,8 @@ public class MainFrameController implements Initializable {
         if (serversList.getSelectionModel().getSelectedItem() == null) {
             return;
         }
-        networkHandler.writeToChannel(new DownloadingRequest(AuthorizationHandler.getSessionCode(), serversList.getSelectionModel().getSelectedItem()));
+        FileImpl file = Arrays.stream(serversFiles).filter(x->x.getFileName().equals(serversListSelectedItem)).findFirst().orElse(null);
+        networkHandler.writeToChannel(new DownloadingRequest(AuthorizationHandler.getSessionCode(), serversListSelectedItem, file.isFile() ));
 
     }
 
@@ -157,7 +171,7 @@ public class MainFrameController implements Initializable {
         }
         File file = fileHandler.getFileByName(filename);
         if (file.isDirectory()){
-            uploadDirectory(file);
+            fileHandler.uploadDirectory(file);
         } else {
             networkHandler.writeToChannel(fileHandler.prepareFileToSending(file));
         }
@@ -281,21 +295,7 @@ public class MainFrameController implements Initializable {
         };
     }
 
-    public void uploadDirectory(File file){
-            log.info("Sending makeDir, and move There: " + file.getName());
-            networkHandler.writeToChannel(new MakeDirRequest(AuthorizationHandler.getSessionCode(), file.getName(), file.lastModified()));
-            networkHandler.writeToChannel(new MovingToDirRequest(AuthorizationHandler.getSessionCode(), file.getName()));
-            File[] files = file.listFiles();
-            for (File file1 : files) {
-                if (file1.isDirectory()){
-                        uploadDirectory(file1);
-                } else {
-                    log.info("Uploading file: " + file1.getName());
-                    networkHandler.writeToChannel(fileHandler.prepareFileToSending(file1));
-                }
-            }
-            networkHandler.writeToChannel(new MovingToDirRequest(AuthorizationHandler.getSessionCode(), "/GoToParent"));
-    }
+
 
     private void updateShareButton(){
         FileImpl file = Arrays.stream(serversFiles).filter(x -> x.getFileName().equals(serversListSelectedItem)).findFirst().orElse(null);

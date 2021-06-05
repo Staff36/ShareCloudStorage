@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
+
 @Data
 @Log4j
 public class FileHandler {
@@ -21,7 +23,8 @@ public class FileHandler {
     private List<File> synchronizedFolders;
     private File sharedFilesDirectory;
 
-   public void initializeUser(String rootDir, String sessionCode){
+
+    public void initializeUser(String rootDir, String sessionCode){
        this.parentDir = Paths.get("ServersStorage", rootDir).toFile();
        if (!parentDir.exists()){
            parentDir.mkdir();
@@ -137,4 +140,6 @@ public class FileHandler {
         File currentFile = Arrays.stream(Objects.requireNonNull(currentDir.listFiles())).filter(x -> x.getName().equals(name)).findFirst().get();
         currentFile.delete();
     }
+
+
 }

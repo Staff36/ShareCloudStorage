@@ -2,6 +2,8 @@ package Handlers;
 
 import MessageTypes.FileData;
 import MessageTypes.FileImpl;
+import MessageTypes.MakeDirRequest;
+import MessageTypes.MovingToDirRequest;
 import lombok.Data;
 import lombok.extern.log4j.Log4j;
 import java.awt.*;
@@ -76,18 +78,6 @@ public class FileHandler {
             e.printStackTrace();
         }
     }
-    public FileData prepareFileToSending(String filename){
-        File file = getFileByName(filename);
-        FileData fileData = null;
-        try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
-        byte[] data = new byte[(int) file.length()];
-        ras.read(data);
-        fileData = new FileData(AuthorizationHandler.getSessionCode(),filename,data,0,0, file.lastModified());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return fileData;
-    }
 
     public FileData prepareFileToSending(File file){
         FileData fileData = null;
@@ -115,6 +105,29 @@ public class FileHandler {
         }
         return file.lastModified() != lastModified;
     }
+    public void uploadDirectory(File file){
+        NetworkHandler networkHandler = NetworkHandler.getInstance();
+        log.info("Sending makeDir, and move There: " + file.getName());
+        networkHandler.writeToChannel(new MakeDirRequest(AuthorizationHandler.getSessionCode(), file.getName(), file.lastModified()));
+        networkHandler.writeToChannel(new MovingToDirRequest(AuthorizationHandler.getSessionCode(), file.getName()));
+        File[] files = file.listFiles();
+        for (File file1 : files) {
+            if (file1.isDirectory()){
+                uploadDirectory(file1);
+            } else {
+                log.info("Uploading file: " + file1.getName());
+                networkHandler.writeToChannel(prepareFileToSending(file1));
+            }
+        }
+        networkHandler.writeToChannel(new MovingToDirRequest(AuthorizationHandler.getSessionCode(), "/GoToParent"));
+    }
 
 
+    public void makeDir(String name) {
+        File file = Paths.get(currentDir.getPath(), name).toFile();
+        if (Arrays.stream(currentDir.listFiles()).anyMatch(x-> x.getName().equals(name))){
+         return;
+        }
+        file.mkdir();
+    }
 }
