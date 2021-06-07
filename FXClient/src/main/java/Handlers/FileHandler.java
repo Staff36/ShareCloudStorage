@@ -16,7 +16,7 @@ import java.util.List;
 @Log4j
 @Data
 public class FileHandler {
-    private final static int PARTS_SIZE =1024 * 1024;
+    private final static int PARTS_SIZE =512 * 1024;
     private List<DirectoryListener> listenedDirectories = new ArrayList<>();
     private File currentDir = File.listRoots()[0];
     private File[] currentFiles;
@@ -87,9 +87,10 @@ public class FileHandler {
             file.delete();
         }
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
-            long position = (long) fileData.getPart() * fileData.getPart();
+            long position = (long) fileData.getPart() * fileData.getPartsSize();
             ras.seek(position);
             ras.write(fileData.getData());
+            log.debug("Writing success, file length is " + file.length() + " now.");
             if (fileData.getPart() == fileData.getTotalPartsValue() - 1){
                 file.setLastModified(fileData.getLastModified());
             }
@@ -99,17 +100,16 @@ public class FileHandler {
     }
 
     public void prepareFileToSending(File file){
-        FileData fileData = null;
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
             if (file.length() > PARTS_SIZE) {
-                int totalPartsValue = (int) Math.ceil(file.length() / PARTS_SIZE);
+                int totalPartsValue = (int) Math.ceil(file.length() / (double) PARTS_SIZE);
                 for (int currentPart = 0; currentPart < totalPartsValue; currentPart++) {
                     long currentPosition = (long) currentPart * PARTS_SIZE;
                     ras.seek(currentPosition);
                     int partsLength = (int) Math.min(file.length() - currentPosition, PARTS_SIZE);
                     byte[] bytes = new byte[partsLength];
                     ras.read(bytes);
-                    log.info("Sending part # " + currentPart + "of Big file: " + file.getName());
+                    log.info("Sending part # " + currentPart + " of " + (totalPartsValue - 1) + " Big file: " + file.getName());
                     networkHandler.writeToChannel(new FileData(AuthorizationHandler.getSessionCode(), file.getName(), bytes, currentPart, totalPartsValue, file.lastModified(), PARTS_SIZE));
                 }
             }else {

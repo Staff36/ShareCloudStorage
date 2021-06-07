@@ -91,6 +91,7 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                     return;
                 }
                 ConfirmEmailSQLite.confirmEmail(returnedConf);
+                ConfirmEmailSQLite.delete(returnedConf);
                 log.info("Success");
                 ctx.writeAndFlush(new ConfirmationAnswer("Success"));
                 return;

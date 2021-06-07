@@ -22,7 +22,7 @@ public class FileHandler {
     private String sessionCode;
     private List<File> synchronizedFolders;
     private File sharedFilesDirectory;
-    private final static int PARTS_SIZE = 1024 * 1024;
+    private final static int PARTS_SIZE = 512 * 1024;
 
     public void initializeUser(String rootDir, String sessionCode){
        this.parentDir = Paths.get("ServersStorage", rootDir).toFile();
@@ -83,9 +83,10 @@ public class FileHandler {
             file.delete();
         }
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
-            long position = (long) fileData.getPart() * fileData.getPart();
+            long position = (long) fileData.getPart() * fileData.getPartsSize();
             ras.seek(position);
             ras.write(fileData.getData());
+            log.debug("Writing success, file length is " + file.length()+ " now.");
             if (fileData.getPart() == fileData.getTotalPartsValue() - 1){
                 file.setLastModified(fileData.getLastModified());
             }
@@ -96,17 +97,20 @@ public class FileHandler {
 
     public void prepareFileToSending(File file, ChannelHandlerContext ctx){
         FileData fileData = null;
+        log.debug("File length= " + file.length() + ", PARTS_SIZE = " + PARTS_SIZE);
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
             if (file.length() > PARTS_SIZE){
-                int totalPartsValue = (int) Math.ceil(file.length() / PARTS_SIZE);
+
+                int totalPartsValue = (int) Math.ceil(file.length() / (double) PARTS_SIZE);
+
                 for (int currentPart = 0; currentPart < totalPartsValue; currentPart++) {
                     long currentPosition = (long) currentPart * PARTS_SIZE;
                     ras.seek(currentPosition);
                     int partsLength = (int) Math.min(file.length() - currentPosition, PARTS_SIZE);
                     byte[] bytes = new byte[partsLength];
                     ras.read(bytes);
-                    log.info("Sending part # " + currentPart + "of Big file: " + file.getName());
-                    ctx.writeAndFlush(new FileData(sessionCode,file.getName(),bytes, currentPart,totalPartsValue, file.lastModified(), PARTS_SIZE));
+                    log.info("Sending part # " + currentPart + "of " + (totalPartsValue - 1)+ " Big file: " + file.getName());
+                    ctx.writeAndFlush(new FileData(sessionCode,file.getName(),bytes, currentPart, totalPartsValue, file.lastModified(), PARTS_SIZE));
                 }
             } else{
                 byte[] bytes = new byte[(int) file.length()];

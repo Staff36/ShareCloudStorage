@@ -76,7 +76,17 @@ public class ConfirmEmailSQLite {
     }
 
     public static int delete(Confirmation entity) {
-        return 0;
+       connect();
+       int rows = 0;
+       try(PreparedStatement statement = connection.prepareStatement("delete from confirm_email where user = (select id from users where email = ?)")){
+           statement.setString(1, entity.getEmail());
+           rows  = statement.executeUpdate();
+       } catch (SQLException throwables) {
+           throwables.printStackTrace();
+       } finally {
+           disconnect();
+       }
+    return rows;
     }
 
     public static void confirmEmail(Confirmation returnedConf) {

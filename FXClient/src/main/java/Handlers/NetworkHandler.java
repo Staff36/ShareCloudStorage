@@ -54,7 +54,6 @@ public class NetworkHandler {
     }
 
     public void writeToChannel(Object o){
-        log.info("Sending message " + o);
         channel.writeAndFlush(o);
     }
 
