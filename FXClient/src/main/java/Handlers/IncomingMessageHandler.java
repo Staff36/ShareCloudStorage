@@ -6,7 +6,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.Data;
 import lombok.extern.log4j.Log4j;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
 @Log4j
 @Data
@@ -25,6 +24,7 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter{
             log.info(msg);
             return;
         }
+
         if (msg instanceof AuthorizationAnswer){
 
             AuthorizationAnswer answer = (AuthorizationAnswer) msg;
@@ -33,9 +33,7 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter{
             callBack.accept(answer.getStatus());
             return;
         }
-
             callBack.accept(msg);
-
 
     }
 }

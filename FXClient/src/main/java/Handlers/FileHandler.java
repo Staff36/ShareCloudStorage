@@ -16,9 +16,11 @@ import java.util.List;
 @Log4j
 @Data
 public class FileHandler {
+    private final static int PARTS_SIZE =1024 * 1024;
     private List<DirectoryListener> listenedDirectories = new ArrayList<>();
     private File currentDir = File.listRoots()[0];
     private File[] currentFiles;
+    private NetworkHandler networkHandler = NetworkHandler.getInstance();
 
     public void moveOrOpenFile(String filename){
         File selectedFile = Arrays.stream(currentDir.listFiles()).filter(x -> x.getAbsolutePath().equals(filename) || x.getName().equals(filename)).findFirst().orElse(currentDir);
@@ -68,7 +70,7 @@ public class FileHandler {
             return Arrays.stream(currentFiles).map(x-> x.getName()).toArray(String[]::new);
         }
     }
-    public void downloadFile(FileData fileData){
+    public void downloadRegularFile(FileData fileData){
         File file = Paths.get(currentDir.toString(), fileData.getName()).toFile();
         try (RandomAccessFile ras = new RandomAccessFile(file,"rw")){
             log.info("Writing file: " + fileData.getName() + " into " + file.getAbsolutePath());
@@ -79,16 +81,45 @@ public class FileHandler {
         }
     }
 
-    public FileData prepareFileToSending(File file){
-        FileData fileData = null;
+    public void downloadBigFile(FileData fileData) {
+        File file = Paths.get(currentDir.toString(), fileData.getName()).toFile();
+        if (file.exists() && fileData.getPart() == 0){
+            file.delete();
+        }
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
-            byte[] data = new byte[(int) file.length()];
-            ras.read(data);
-            fileData = new FileData(AuthorizationHandler.getSessionCode(),file.getName(),data,0,0, file.lastModified());
+            long position = (long) fileData.getPart() * fileData.getPart();
+            ras.seek(position);
+            ras.write(fileData.getData());
+            if (fileData.getPart() == fileData.getTotalPartsValue() - 1){
+                file.setLastModified(fileData.getLastModified());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return fileData;
+    }
+
+    public void prepareFileToSending(File file){
+        FileData fileData = null;
+        try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
+            if (file.length() > PARTS_SIZE) {
+                int totalPartsValue = (int) Math.ceil(file.length() / PARTS_SIZE);
+                for (int currentPart = 0; currentPart < totalPartsValue; currentPart++) {
+                    long currentPosition = (long) currentPart * PARTS_SIZE;
+                    ras.seek(currentPosition);
+                    int partsLength = (int) Math.min(file.length() - currentPosition, PARTS_SIZE);
+                    byte[] bytes = new byte[partsLength];
+                    ras.read(bytes);
+                    log.info("Sending part # " + currentPart + "of Big file: " + file.getName());
+                    networkHandler.writeToChannel(new FileData(AuthorizationHandler.getSessionCode(), file.getName(), bytes, currentPart, totalPartsValue, file.lastModified(), PARTS_SIZE));
+                }
+            }else {
+                byte[] data = new byte[(int) file.length()];
+                ras.read(data);
+                networkHandler.writeToChannel(new FileData(AuthorizationHandler.getSessionCode(),file.getName(),data,0,0, file.lastModified(), (int) file.length()));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void updateDirectory() {
@@ -116,7 +147,7 @@ public class FileHandler {
                 uploadDirectory(file1);
             } else {
                 log.info("Uploading file: " + file1.getName());
-                networkHandler.writeToChannel(prepareFileToSending(file1));
+                prepareFileToSending(file1);
             }
         }
         networkHandler.writeToChannel(new MovingToDirRequest(AuthorizationHandler.getSessionCode(), "/GoToParent"));

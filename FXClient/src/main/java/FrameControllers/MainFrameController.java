@@ -17,12 +17,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j;
-
 import java.io.File;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+
 @Log4j
 public class MainFrameController implements Initializable {
     public ListView<String> clientsList;
@@ -69,7 +70,6 @@ public class MainFrameController implements Initializable {
         fileHandler.moveOrOpenFile(clientsListSelectedItem);
         repaintClientsSide(fileHandler.getCurrentFiles());
         clientsListSelectedItem = null;
-
     }
 
     public void selectItemOnServersList(MouseEvent mouseEvent) {
@@ -104,7 +104,6 @@ public class MainFrameController implements Initializable {
         serversList.getItems().clear();
         serversList.getItems().addAll(fil);
         serversList.setCellFactory(this::updateServersView);
-
         serversList.refresh();
     }
 
@@ -119,9 +118,17 @@ public class MainFrameController implements Initializable {
         if (o instanceof FileData) {
             FileData fileData = (FileData) o;
             log.info("Downloading file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
-            fileHandler.downloadFile(fileData);
-            fileHandler.updateDirectory();
-            repaintClientsSide(fileHandler.getCurrentFiles());
+            if(fileData.getTotalPartsValue() > 0){
+                fileHandler.downloadBigFile(fileData);
+                if(fileData.getPart() == fileData.getTotalPartsValue()){
+                    fileHandler.updateDirectory();
+                    repaintClientsSide(fileHandler.getCurrentFiles());
+                }
+            } else{
+                fileHandler.downloadRegularFile(fileData);
+                fileHandler.updateDirectory();
+                repaintClientsSide(fileHandler.getCurrentFiles());
+            }
         }
 
         if (o instanceof MakeDirRequest){
@@ -138,6 +145,7 @@ public class MainFrameController implements Initializable {
             }
         }
     }
+
 
     public void clientMoveToParent(ActionEvent actionEvent) {
         fileHandler.moveUp();
@@ -173,7 +181,7 @@ public class MainFrameController implements Initializable {
         if (file.isDirectory()){
             fileHandler.uploadDirectory(file);
         } else {
-            networkHandler.writeToChannel(fileHandler.prepareFileToSending(file));
+            fileHandler.prepareFileToSending(file);
         }
         networkHandler.writeToChannel(new ListFilesRequest(AuthorizationHandler.getSessionCode(), ""));
     }

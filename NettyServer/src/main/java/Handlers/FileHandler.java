@@ -2,6 +2,7 @@ package Handlers;
 
 import DAO.SharedFilesImplSQLite;
 import MessageTypes.*;
+import io.netty.channel.ChannelHandlerContext;
 import lombok.Data;
 import lombok.extern.log4j.Log4j;
 import java.io.File;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 @Data
 @Log4j
@@ -22,23 +22,22 @@ public class FileHandler {
     private String sessionCode;
     private List<File> synchronizedFolders;
     private File sharedFilesDirectory;
-
+    private final static int PARTS_SIZE = 1024 * 1024;
 
     public void initializeUser(String rootDir, String sessionCode){
        this.parentDir = Paths.get("ServersStorage", rootDir).toFile();
        if (!parentDir.exists()){
            parentDir.mkdir();
-
        }
        sharedFilesDirectory = Paths.get("ServersStorage", rootDir, "Shared Files").toFile();
        if(!sharedFilesDirectory.exists()){
            sharedFilesDirectory.mkdir();
        }
-
        currentDir = parentDir;
        this.sessionCode = sessionCode;
        synchronizedFolders = new ArrayList<>();
    }
+
    public File getFileByName(String name){
        return Arrays.stream(currentDir.listFiles()).filter(x->x.getName().equals(name)).findFirst().orElse(null);
    }
@@ -65,7 +64,7 @@ public class FileHandler {
         }
     }
 
-    public void downloadFile(FileData fileData){
+    public void downloadRegularFile(FileData fileData){
         File file = Paths.get(currentDir.toString(), fileData.getName()).toFile();
         log.info("Downloading file: " +file.getName());
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
@@ -77,33 +76,56 @@ public class FileHandler {
             updateListsOfDirectories();
         }
     }
-    public FileData prepareFileToUploading(File file){
+
+    public void downloadBigFile(FileData fileData) {
+        File file = Paths.get(currentDir.toString(), fileData.getName()).toFile();
+        if (file.exists() && fileData.getPart() == 0){
+            file.delete();
+        }
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
-            byte[] bytes = new byte[(int) file.length()];
-            ras.read(bytes);
-            log.info("Sending file: " + file.getName());
-            return new FileData(sessionCode,file.getName(),bytes, 0,0, file.lastModified());
+            long position = (long) fileData.getPart() * fileData.getPart();
+            ras.seek(position);
+            ras.write(fileData.getData());
+            if (fileData.getPart() == fileData.getTotalPartsValue() - 1){
+                file.setLastModified(fileData.getLastModified());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
-    public FileData prepareFileToUploading(String name){
-        File file = Paths.get(currentDir.toString(), name).toFile();
+    public void prepareFileToSending(File file, ChannelHandlerContext ctx){
+        FileData fileData = null;
         try(RandomAccessFile ras = new RandomAccessFile(file, "rw")){
-           byte[] bytes = new byte[(int) file.length()];
-            ras.read(bytes);
-            log.info("Sending file: " + file.getName());
-            return new FileData(sessionCode,name,bytes, 0,0, file.lastModified());
+            if (file.length() > PARTS_SIZE){
+                int totalPartsValue = (int) Math.ceil(file.length() / PARTS_SIZE);
+                for (int currentPart = 0; currentPart < totalPartsValue; currentPart++) {
+                    long currentPosition = (long) currentPart * PARTS_SIZE;
+                    ras.seek(currentPosition);
+                    int partsLength = (int) Math.min(file.length() - currentPosition, PARTS_SIZE);
+                    byte[] bytes = new byte[partsLength];
+                    ras.read(bytes);
+                    log.info("Sending part # " + currentPart + "of Big file: " + file.getName());
+                    ctx.writeAndFlush(new FileData(sessionCode,file.getName(),bytes, currentPart,totalPartsValue, file.lastModified(), PARTS_SIZE));
+                }
+            } else{
+                byte[] bytes = new byte[(int) file.length()];
+                ras.read(bytes);
+                log.info("Sending file: " + file.getName());
+                ctx.writeAndFlush(new FileData(sessionCode,file.getName(),bytes, 0,0, file.lastModified(), (int) file.length()));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+
+    }
+
+    public void prepareFileToSending(String name, ChannelHandlerContext ctx){
+        File file = Paths.get(currentDir.toString(), name).toFile();
+         prepareFileToSending(file, ctx);
     }
 
     public FileImpl[] getListFiles() {
-
         return Arrays.stream(currentDir.listFiles())
                 .map(x ->{
                         File file = SharedFilesImplSQLite.getSharableFileByName(x.getName(), parentDir);
@@ -141,5 +163,20 @@ public class FileHandler {
         currentFile.delete();
     }
 
+    public void uploadDirectory(File file, ChannelHandlerContext ctx){
+        log.info("Sending makeDir, and move There: " + file.getName());
+        ctx.writeAndFlush(new MakeDirRequest("", file.getName(), file.lastModified()));
+        ctx.writeAndFlush(new MovingToDirRequest("", file.getName()));
+        File[] files = file.listFiles();
+        for (File file1 : files) {
+            if (file1.isDirectory()){
+                uploadDirectory(file1, ctx);
+            } else {
+                log.info("Uploading file: " + file1.getName());
+                prepareFileToSending(file1, ctx);
+            }
+        }
+        ctx.writeAndFlush(new MovingToDirRequest("AuthorizationHandler.getSessionCode()", "/GoToParent"));
+    }
 
 }

@@ -12,18 +12,16 @@ import lombok.extern.log4j.Log4j;
 
 import java.io.File;
 import java.util.Random;
-import java.util.function.Consumer;
 
 
 @Log4j
 public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
-    private FileHandler fileHandler = new FileHandler();
-    private MailSender mailSender = new MailSender();
+    private final FileHandler fileHandler = new FileHandler();
+    private final MailSender mailSender = new MailSender();
     private final Random random = new Random();
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-
             if(msg == null){
                 log.info("Nullable message");
                 return;
@@ -104,7 +102,7 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 if (lfr.getFilename().equals("/parent")){
                     fileHandler.moveToParentDirectory();
                 } else if (lfr.getFilename().equals("")){
-
+                    //do nothing, updating current directory
                 } else {
                     fileHandler.moveToDirectory(lfr.getFilename());
                 }
@@ -124,24 +122,29 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 }
                 FileData fileData = (FileData) msg;
                 log.info("Incoming file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
-                fileHandler.downloadFile(fileData);
-                ctx.writeAndFlush(new FilesList(fileHandler.getListFiles()));
+                if(fileData.getTotalPartsValue() == 0){
+                    fileHandler.downloadRegularFile(fileData);
+                    ctx.writeAndFlush(new FilesList(fileHandler.getListFiles()));
+                } else{
+                    fileHandler.downloadBigFile(fileData);
+                    if(fileData.getPart() == fileData.getTotalPartsValue()){
+                        ctx.writeAndFlush(new FilesList(fileHandler.getListFiles()));
+                    }
+                }
                 return;
             }
 
             if (msg instanceof DownloadingRequest){
                 DownloadingRequest fdr = (DownloadingRequest) msg;
-                FileData fileData;
                 if (fileHandler.getCurrentDir().equals(fileHandler.getSharedFilesDirectory())){
                     File file = SharedFilesImplSQLite.getSharableFileByName(fdr.getFilename(), fileHandler.getParentDir());
-                    fileData = fileHandler.prepareFileToUploading(file);
+                    fileHandler.prepareFileToSending(file, ctx);
+
                 } else{
                     if(fdr.isFile()){
-                        fileData = fileHandler.prepareFileToUploading(fdr.getFilename());
-                        log.info("Sending file, name: " + fileData.getName() + ", size: " + fileData.getData().length);
-                        ctx.writeAndFlush(fileData);
+                        fileHandler.prepareFileToSending(fdr.getFilename(), ctx);
                     } else {
-                        uploadDirectory(fileHandler.getFileByName(fdr.getFilename()), ctx);
+                        fileHandler.uploadDirectory(fileHandler.getFileByName(fdr.getFilename()), ctx);
                     }
                 }
                 return;
@@ -189,25 +192,11 @@ public class IncomingMessageHandler extends ChannelInboundHandlerAdapter {
                 ShareFileRequest sfr = (ShareFileRequest) msg;
                 log.info(sfr);
                 SharedFilesImplSQLite.shareFile(fileHandler.getFileByName(sfr.getFile().getFileName()),fileHandler.getParentDir(), sfr.getDestinator());
-
                 return;
             }
             log.error("Unknown msg type: Class= " + msg.getClass().getCanonicalName() + " !");
         }
 
-    public void uploadDirectory(File file, ChannelHandlerContext ctx){
-        log.info("Sending makeDir, and move There: " + file.getName());
-        ctx.writeAndFlush(new MakeDirRequest("", file.getName(), file.lastModified()));
-        ctx.writeAndFlush(new MovingToDirRequest("", file.getName()));
-        File[] files = file.listFiles();
-        for (File file1 : files) {
-            if (file1.isDirectory()){
-                uploadDirectory(file1, ctx);
-            } else {
-                log.info("Uploading file: " + file1.getName());
-                ctx.writeAndFlush(fileHandler.prepareFileToUploading(file1));
-            }
-        }
-        ctx.writeAndFlush(new MovingToDirRequest("AuthorizationHandler.getSessionCode()", "/GoToParent"));
-    }
+
+
 }
