@@ -9,7 +9,6 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import lombok.extern.log4j.Log4j;
 import java.io.IOException;
-import java.util.Objects;
 
 @Log4j
 public class FrameSwitcher {

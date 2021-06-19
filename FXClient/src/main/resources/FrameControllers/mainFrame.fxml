@@ -8,14 +8,13 @@
 
       <Group layoutX="21.0" layoutY="30.0">
             <ListView fx:id="clientsList" layoutY="65.0" onMouseClicked="#selectItemOnClientsList" prefHeight="505.0" prefWidth="347.0" />
-            <TextField fx:id="clientsPath" layoutY="31.0" prefHeight="25.0" prefWidth="226.0" />
+            <TextField fx:id="clientsPath" layoutY="31.0" prefHeight="25.0" prefWidth="276.0" />
             <Button fx:id="clientsUp" layoutX="286.0" layoutY="31.0" mnemonicParsing="false" onAction="#clientMoveToParent" prefHeight="25.0" prefWidth="61.0" text="Up" />
             <Button fx:id="clientsRenameButton" layoutX="227.0" layoutY="580.0" mnemonicParsing="false" onAction="#renameClientsFile" text="Rename" />
             <Button fx:id="clientsDeleteButton" layoutX="296.0" layoutY="580.0" mnemonicParsing="false" onAction="#deleteClientsFile" text="Delete" />
             <Button fx:id="mkClientsDirButton" layoutX="145.0" layoutY="580.0" mnemonicParsing="false" onAction="#createClientsDir" text="New folder" />
             <Label layoutX="128.0" layoutY="8.0" prefHeight="17.0" prefWidth="77.0" text="Clients drive" />
-         <Button fx:id="clientsUpdateButton" layoutY="580.0" mnemonicParsing="false" text="Refresh" onAction="#updateClientsList"/>
-      <Button layoutX="234.0" layoutY="31.0" mnemonicParsing="false" onAction="#synchronizeCurrentFolder" prefHeight="25.0" prefWidth="44.0" text="Sync" />
+         <Button fx:id="clientsUpdateButton" layoutY="580.0" mnemonicParsing="false" onAction="#updateClientsList" text="Refresh" />
       </Group>
       <Group layoutX="-45.0" layoutY="14.0">
           <ListView fx:id="serversList" layoutX="447.0" layoutY="81.0" onMouseClicked="#selectItemOnServersList" prefHeight="505.0" prefWidth="345.0" />
@@ -25,15 +24,11 @@
           <Button fx:id="serversDeleteButton" layoutX="742.0" layoutY="596.0" mnemonicParsing="false" onAction="#deleteServersFile" text="Delete" />
           <Button fx:id="mkServersDirButton" layoutX="589.0" layoutY="596.0" mnemonicParsing="false" onAction="#createServersDir" text="New folder" />
           <Label layoutX="586.0" layoutY="24.0" prefHeight="17.0" prefWidth="81.0" text="Servers drive" />
-         <Button fx:id="serversUpdateButton" layoutX="447.0" layoutY="596.0" mnemonicParsing="false" text="Refresh"  onAction="#updateServersList"/>
+         <Button fx:id="serversUpdateButton" layoutX="447.0" layoutY="596.0" mnemonicParsing="false" onAction="#updateServersList" text="Refresh" />
       <Button fx:id="sharButton" layoutX="655.0" layoutY="47.0" mnemonicParsing="false" onAction="#shareFile" prefHeight="25.0" prefWidth="66.0" text="Share" />
       </Group>
       <Button layoutX="370.0" layoutY="289.0" mnemonicParsing="false" onAction="#download" prefHeight="25.0" prefWidth="30.0" text="&lt;-" />
       <Button layoutX="370.0" layoutY="366.0" mnemonicParsing="false" onAction="#upload" text="-&gt;" />
-   <ToolBar nodeOrientation="RIGHT_TO_LEFT" prefHeight="25.0" prefWidth="769.0">
-     <items>
-       <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="65.0" text="Settings" textAlignment="RIGHT" />
-     </items>
-   </ToolBar>
+   <ToolBar nodeOrientation="RIGHT_TO_LEFT" prefHeight="25.0" prefWidth="769.0" />
    <Pane layoutY="652.0" prefHeight="25.0" prefWidth="769.0" style="-fx-background-color: white;" />
 </AnchorPane>
